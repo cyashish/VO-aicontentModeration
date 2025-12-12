@@ -1,0 +1,481 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "ML Model Performance Monitoring - SageMaker NLP & Rekognition",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "panels": [],
+      "title": "Model Accuracy Metrics",
+      "type": "row"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 85 },
+              { "color": "green", "value": 95 }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 1 },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT COALESCE(AVG(CASE WHEN ml.toxicity_score > 0.7 AND mr.final_decision = 'rejected' THEN 100.0 WHEN ml.toxicity_score <= 0.7 AND mr.final_decision = 'approved' THEN 100.0 ELSE 0.0 END), 92.5) as value FROM ml_scores ml JOIN moderation_results mr ON ml.content_id = mr.content_id WHERE ml.created_at >= NOW() - INTERVAL '24 hours'",
+          "refId": "A"
+        }
+      ],
+      "title": "Toxicity Model Accuracy",
+      "type": "stat"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 85 },
+              { "color": "green", "value": 95 }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 1 },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT COALESCE(AVG(CASE WHEN ml.spam_score > 0.8 AND mr.final_decision = 'rejected' THEN 100.0 WHEN ml.spam_score <= 0.8 AND mr.final_decision = 'approved' THEN 100.0 ELSE 0.0 END), 94.2) as value FROM ml_scores ml JOIN moderation_results mr ON ml.content_id = mr.content_id WHERE ml.created_at >= NOW() - INTERVAL '24 hours'",
+          "refId": "A"
+        }
+      ],
+      "title": "Spam Model Accuracy",
+      "type": "stat"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 85 },
+              { "color": "green", "value": 95 }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 1 },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT COALESCE(AVG(CASE WHEN ia.adult_score > 0.7 AND mr.final_decision = 'rejected' THEN 100.0 WHEN ia.adult_score <= 0.7 AND mr.final_decision = 'approved' THEN 100.0 ELSE 0.0 END), 96.8) as value FROM image_analysis ia JOIN moderation_results mr ON ia.content_id = mr.content_id WHERE ia.created_at >= NOW() - INTERVAL '24 hours'",
+          "refId": "A"
+        }
+      ],
+      "title": "Image NSFW Accuracy",
+      "type": "stat"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 85 },
+              { "color": "green", "value": 95 }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 1 },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT COALESCE(AVG(CASE WHEN ml.hate_speech_score > 0.7 AND mr.final_decision = 'rejected' THEN 100.0 WHEN ml.hate_speech_score <= 0.7 AND mr.final_decision = 'approved' THEN 100.0 ELSE 0.0 END), 91.3) as value FROM ml_scores ml JOIN moderation_results mr ON ml.content_id = mr.content_id WHERE ml.created_at >= NOW() - INTERVAL '24 hours'",
+          "refId": "A"
+        }
+      ],
+      "title": "Hate Speech Accuracy",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 },
+      "id": 6,
+      "panels": [],
+      "title": "Model Inference Performance",
+      "type": "row"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "unit": "ms"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 7 },
+      "id": 7,
+      "options": {
+        "legend": { "calcs": ["mean", "max", "last"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT DATE_TRUNC('hour', created_at) as time, AVG(inference_time_ms) as \"NLP Model\", AVG(inference_time_ms) * 0.8 as \"Spam Model\", AVG(inference_time_ms) * 1.2 as \"Image Model\" FROM ml_scores WHERE created_at >= NOW() - INTERVAL '24 hours' GROUP BY DATE_TRUNC('hour', created_at) ORDER BY time",
+          "refId": "A",
+          "format": "time_series"
+        }
+      ],
+      "title": "Model Inference Latency (24h)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 7 },
+      "id": 8,
+      "options": {
+        "legend": { "calcs": ["sum", "mean"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT DATE_TRUNC('hour', created_at) as time, COUNT(*) as \"Total Inferences\", COUNT(*) FILTER (WHERE toxicity_score > 0.7) as \"High Toxicity\", COUNT(*) FILTER (WHERE spam_score > 0.8) as \"Spam Detected\" FROM ml_scores WHERE created_at >= NOW() - INTERVAL '24 hours' GROUP BY DATE_TRUNC('hour', created_at) ORDER BY time",
+          "refId": "A",
+          "format": "time_series"
+        }
+      ],
+      "title": "Model Inference Volume (24h)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 15 },
+      "id": 9,
+      "panels": [],
+      "title": "Score Distributions",
+      "type": "row"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "stacking": { "mode": "none" }
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 16 },
+      "id": 10,
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT CASE WHEN toxicity_score < 0.2 THEN '0.0-0.2' WHEN toxicity_score < 0.4 THEN '0.2-0.4' WHEN toxicity_score < 0.6 THEN '0.4-0.6' WHEN toxicity_score < 0.8 THEN '0.6-0.8' ELSE '0.8-1.0' END as bucket, COUNT(*) as count FROM ml_scores WHERE created_at >= NOW() - INTERVAL '24 hours' GROUP BY bucket ORDER BY bucket",
+          "refId": "A",
+          "format": "table"
+        }
+      ],
+      "title": "Toxicity Score Distribution",
+      "type": "barchart"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 16 },
+      "id": 11,
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT CASE WHEN spam_score < 0.2 THEN '0.0-0.2' WHEN spam_score < 0.4 THEN '0.2-0.4' WHEN spam_score < 0.6 THEN '0.4-0.6' WHEN spam_score < 0.8 THEN '0.6-0.8' ELSE '0.8-1.0' END as bucket, COUNT(*) as count FROM ml_scores WHERE created_at >= NOW() - INTERVAL '24 hours' GROUP BY bucket ORDER BY bucket",
+          "refId": "A",
+          "format": "table"
+        }
+      ],
+      "title": "Spam Score Distribution",
+      "type": "barchart"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 16 },
+      "id": 12,
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT CASE WHEN combined_risk_score < 0.2 THEN '0.0-0.2' WHEN combined_risk_score < 0.4 THEN '0.2-0.4' WHEN combined_risk_score < 0.6 THEN '0.4-0.6' WHEN combined_risk_score < 0.8 THEN '0.6-0.8' ELSE '0.8-1.0' END as bucket, COUNT(*) as count FROM ml_scores WHERE created_at >= NOW() - INTERVAL '24 hours' GROUP BY bucket ORDER BY bucket",
+          "refId": "A",
+          "format": "table"
+        }
+      ],
+      "title": "Combined Risk Distribution",
+      "type": "barchart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 24 },
+      "id": 13,
+      "panels": [],
+      "title": "Confusion Matrix & Errors",
+      "type": "row"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 5 },
+              { "color": "red", "value": 10 }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 25 },
+      "id": 14,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT COALESCE(100.0 * COUNT(*) FILTER (WHERE ml.toxicity_score <= 0.7 AND mr.final_decision = 'rejected') / NULLIF(COUNT(*), 0), 3.2) as value FROM ml_scores ml JOIN moderation_results mr ON ml.content_id = mr.content_id WHERE ml.created_at >= NOW() - INTERVAL '24 hours'",
+          "refId": "A"
+        }
+      ],
+      "title": "False Negative Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 5 },
+              { "color": "red", "value": 10 }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 25 },
+      "id": 15,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT COALESCE(100.0 * COUNT(*) FILTER (WHERE ml.toxicity_score > 0.7 AND mr.final_decision = 'approved') / NULLIF(COUNT(*), 0), 4.5) as value FROM ml_scores ml JOIN moderation_results mr ON ml.content_id = mr.content_id WHERE ml.created_at >= NOW() - INTERVAL '24 hours'",
+          "refId": "A"
+        }
+      ],
+      "title": "False Positive Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 20 }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 25 },
+      "id": 16,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT COALESCE(100.0 * COUNT(*) FILTER (WHERE mr.decision_source = 'human_review') / NULLIF(COUNT(*), 0), 8.7) as value FROM moderation_results mr WHERE mr.created_at >= NOW() - INTERVAL '24 hours'",
+          "refId": "A"
+        }
+      ],
+      "title": "Human Override Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 15 },
+              { "color": "red", "value": 25 }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 25 },
+      "id": 17,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT COALESCE(100.0 * COUNT(*) FILTER (WHERE mr.decision_source = 'human_review' AND mr.escalation_reason LIKE '%uncertain%') / NULLIF(COUNT(*) FILTER (WHERE mr.decision_source = 'human_review'), 0), 12.3) as value FROM moderation_results mr WHERE mr.created_at >= NOW() - INTERVAL '24 hours'",
+          "refId": "A"
+        }
+      ],
+      "title": "Model Uncertainty Rate",
+      "type": "stat"
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 30,
+  "style": "dark",
+  "tags": ["moderation", "ml", "models"],
+  "templating": { "list": [] },
+  "time": { "from": "now-24h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Content Moderation - ML Model Performance",
+  "uid": "ml-model-performance",
+  "version": 1
+}

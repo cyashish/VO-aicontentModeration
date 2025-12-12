@@ -1,0 +1,68 @@
+# Prometheus Configuration for Content Moderation Pipeline
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'content-moderation'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+rule_files:
+  - /etc/prometheus/rules/*.yml
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Moderation API metrics
+  - job_name: 'moderation-api'
+    static_configs:
+      - targets: ['moderation-api:8000']
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # Triage Service
+  - job_name: 'triage-service'
+    static_configs:
+      - targets: ['moderation-api:8000']
+    metrics_path: /metrics/triage
+    scrape_interval: 10s
+
+  # ML Scoring Service
+  - job_name: 'ml-scoring'
+    static_configs:
+      - targets: ['moderation-api:8000']
+    metrics_path: /metrics/ml
+    scrape_interval: 15s
+
+  # Flink metrics
+  - job_name: 'flink-processor'
+    static_configs:
+      - targets: ['flink-jobmanager:8081']
+    metrics_path: /metrics
+
+  # Kafka metrics (via JMX exporter)
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka:9092']
+
+  # Redis metrics
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+
+  # PostgreSQL metrics (via postgres_exporter)
+  - job_name: 'postgresql'
+    static_configs:
+      - targets: ['postgres:5432']
+
+  # Node exporter for system metrics
+  - job_name: 'node'
+    static_configs:
+      - targets: ['localhost:9100']

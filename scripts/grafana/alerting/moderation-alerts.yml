@@ -1,0 +1,186 @@
+# Grafana Alerting Rules for Content Moderation
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Content Moderation Alerts
+    folder: Content Moderation
+    interval: 1m
+    rules:
+      - uid: high-latency-alert
+        title: High Processing Latency
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: PostgreSQL
+            model:
+              rawSql: "SELECT AVG(avg_processing_time_ms) FROM mart_moderation_metrics_hourly WHERE metric_hour >= NOW() - INTERVAL '5 minutes'"
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [500]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: avg
+              type: classic_conditions
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          summary: Processing latency exceeds 500ms threshold
+          description: Average processing latency is {{ $values.A }}ms
+        labels:
+          severity: warning
+          team: moderation
+
+      - uid: sla-breach-alert
+        title: SLA Compliance Below Threshold
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: PostgreSQL
+            model:
+              rawSql: "SELECT AVG(sla_compliance_rate_pct) FROM mart_sla_performance WHERE metric_hour >= NOW() - INTERVAL '1 hour'"
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [90]
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: avg
+              type: classic_conditions
+        noDataState: NoData
+        execErrState: Alerting
+        for: 10m
+        annotations:
+          summary: SLA compliance dropped below 90%
+          description: Current SLA compliance is {{ $values.A }}%
+        labels:
+          severity: critical
+          team: moderation
+
+      - uid: high-rejection-rate
+        title: High Content Rejection Rate
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: PostgreSQL
+            model:
+              rawSql: "SELECT rejection_rate_pct FROM mart_moderation_metrics_hourly ORDER BY metric_hour DESC LIMIT 1"
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [20]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+              type: classic_conditions
+        noDataState: NoData
+        execErrState: Alerting
+        for: 15m
+        annotations:
+          summary: Content rejection rate exceeds 20%
+          description: Current rejection rate is {{ $values.A }}%
+        labels:
+          severity: warning
+          team: moderation
+
+      - uid: queue-backlog-alert
+        title: Review Queue Backlog
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: PostgreSQL
+            model:
+              rawSql: "SELECT SUM(pending_tasks) FROM mart_sla_performance WHERE metric_hour >= NOW() - INTERVAL '5 minutes'"
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [100]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: sum
+              type: classic_conditions
+        noDataState: NoData
+        execErrState: Alerting
+        for: 10m
+        annotations:
+          summary: Review queue has over 100 pending tasks
+          description: Current pending tasks {{ $values.A }}
+        labels:
+          severity: warning
+          team: moderation
+
+      - uid: realtime-latency-breach
+        title: Real-time Latency SLA Breach
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 60
+              to: 0
+            datasourceUid: PostgreSQL
+            model:
+              rawSql: "SELECT AVG(processing_time_ms) FROM realtime_decisions WHERE created_at >= NOW() - INTERVAL '1 minute'"
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [10]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: avg
+              type: classic_conditions
+        noDataState: NoData
+        execErrState: Alerting
+        for: 2m
+        annotations:
+          summary: Real-time processing exceeds 10ms SLA
+          description: Average latency is {{ $values.A }}ms
+        labels:
+          severity: critical
+          team: realtime

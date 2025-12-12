@@ -1,0 +1,42 @@
+# dbt Project Configuration for Content Moderation Analytics
+name: 'content_moderation'
+version: '1.0.0'
+config-version: 2
+
+profile: 'content_moderation'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+vars:
+  # Configurable thresholds
+  spam_threshold: 0.8
+  toxicity_threshold: 0.7
+  hate_speech_threshold: 0.6
+  sla_critical_minutes: 5
+  sla_urgent_minutes: 15
+  sla_high_minutes: 60
+  
+  # Date ranges for incremental models
+  days_lookback: 30
+
+models:
+  content_moderation:
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: table
+      +schema: intermediate
+    marts:
+      +materialized: table
+      +schema: analytics

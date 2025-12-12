@@ -1,0 +1,69 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw tables from the content moderation database
+    database: moderation_db
+    schema: public
+    
+    tables:
+      - name: users
+        description: User accounts
+        columns:
+          - name: id
+            description: Primary key
+            tests:
+              - unique
+              - not_null
+          - name: username
+            tests:
+              - unique
+              - not_null
+              
+      - name: content
+        description: Content submissions for moderation
+        columns:
+          - name: id
+            tests:
+              - unique
+              - not_null
+          - name: user_id
+            tests:
+              - not_null
+              - relationships:
+                  to: source('raw', 'users')
+                  field: id
+                  
+      - name: moderation_results
+        description: Moderation decisions
+        columns:
+          - name: id
+            tests:
+              - unique
+              - not_null
+          - name: content_id
+            tests:
+              - not_null
+              
+      - name: ml_scores
+        description: ML model scores
+        
+      - name: image_analysis
+        description: Image moderation results
+        
+      - name: review_tasks
+        description: Human review queue
+        columns:
+          - name: id
+            tests:
+              - unique
+              - not_null
+              
+      - name: review_decisions
+        description: Human review decisions
+        
+      - name: violation_history
+        description: User violation records
+        
+      - name: user_reputation
+        description: User reputation scores

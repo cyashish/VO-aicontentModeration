@@ -1,0 +1,36 @@
+# Grafana Datasource Provisioning Configuration
+apiVersion: 1
+
+datasources:
+  - name: PostgreSQL
+    type: postgres
+    url: ${POSTGRES_HOST}:${POSTGRES_PORT}
+    database: ${POSTGRES_DB}
+    user: ${POSTGRES_USER}
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    jsonData:
+      sslmode: require
+      maxOpenConns: 10
+      maxIdleConns: 5
+      connMaxLifetime: 14400
+      postgresVersion: 1400
+      timescaledb: false
+    isDefault: true
+    editable: true
+
+  - name: CloudWatch
+    type: cloudwatch
+    jsonData:
+      authType: default
+      defaultRegion: ${AWS_REGION}
+    editable: true
+
+  - name: Prometheus
+    type: prometheus
+    url: http://prometheus:9090
+    jsonData:
+      httpMethod: POST
+      manageAlerts: true
+      prometheusType: Prometheus
+    editable: true

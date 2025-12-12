@@ -1,0 +1,320 @@
+{
+  "annotations": { "list": [] },
+  "description": "Human Review SLA Performance and Queue Metrics",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "panels": [],
+      "title": "SLA Overview",
+      "type": "row"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 90 },
+              { "color": "green", "value": 95 }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 1 },
+      "id": 2,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT AVG(sla_compliance_rate_pct) as value FROM mart_sla_performance WHERE metric_hour >= NOW() - INTERVAL '24 hours'",
+          "refId": "A"
+        }
+      ],
+      "title": "Overall SLA Compliance (24h)",
+      "type": "gauge"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 90 },
+              { "color": "green", "value": 98 }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 1 },
+      "id": 3,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT AVG(sla_compliance_rate_pct) as value FROM mart_sla_performance WHERE metric_hour >= NOW() - INTERVAL '24 hours' AND priority_label = 'critical'",
+          "refId": "A"
+        }
+      ],
+      "title": "Critical SLA (24h)",
+      "type": "gauge"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 85 },
+              { "color": "green", "value": 95 }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 1 },
+      "id": 4,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT AVG(sla_compliance_rate_pct) as value FROM mart_sla_performance WHERE metric_hour >= NOW() - INTERVAL '24 hours' AND priority_label = 'urgent'",
+          "refId": "A"
+        }
+      ],
+      "title": "Urgent SLA (24h)",
+      "type": "gauge"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 80 },
+              { "color": "green", "value": 90 }
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 1 },
+      "id": 5,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT AVG(sla_compliance_rate_pct) as value FROM mart_sla_performance WHERE metric_hour >= NOW() - INTERVAL '24 hours' AND priority_label = 'high'",
+          "refId": "A"
+        }
+      ],
+      "title": "High SLA (24h)",
+      "type": "gauge"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
+      "id": 6,
+      "panels": [],
+      "title": "Queue Status",
+      "type": "row"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "stacking": { "group": "A", "mode": "normal" }
+          },
+          "mappings": [],
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "id": 7,
+      "options": {
+        "legend": { "calcs": ["sum"], "displayMode": "table", "placement": "right" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT metric_hour as time, SUM(CASE WHEN priority_label = 'critical' THEN pending_tasks ELSE 0 END) as \"Critical\", SUM(CASE WHEN priority_label = 'urgent' THEN pending_tasks ELSE 0 END) as \"Urgent\", SUM(CASE WHEN priority_label = 'high' THEN pending_tasks ELSE 0 END) as \"High\", SUM(CASE WHEN priority_label = 'medium' THEN pending_tasks ELSE 0 END) as \"Medium\", SUM(CASE WHEN priority_label = 'low' THEN pending_tasks ELSE 0 END) as \"Low\" FROM mart_sla_performance WHERE metric_hour >= NOW() - INTERVAL '24 hours' GROUP BY metric_hour ORDER BY metric_hour",
+          "refId": "A",
+          "format": "time_series"
+        }
+      ],
+      "title": "Queue Depth by Priority",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2
+          },
+          "mappings": [],
+          "unit": "m"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "id": 8,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "right" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT metric_hour as time, AVG(CASE WHEN priority_label = 'critical' THEN avg_wait_time_minutes END) as \"Critical\", AVG(CASE WHEN priority_label = 'urgent' THEN avg_wait_time_minutes END) as \"Urgent\", AVG(CASE WHEN priority_label = 'high' THEN avg_wait_time_minutes END) as \"High\" FROM mart_sla_performance WHERE metric_hour >= NOW() - INTERVAL '24 hours' GROUP BY metric_hour ORDER BY metric_hour",
+          "refId": "A",
+          "format": "time_series"
+        }
+      ],
+      "title": "Average Wait Time by Priority",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 16 },
+      "id": 9,
+      "panels": [],
+      "title": "Actions & Escalations",
+      "type": "row"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "lineWidth": 2,
+            "stacking": { "mode": "none" }
+          },
+          "mappings": [],
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 17 },
+      "id": 10,
+      "options": {
+        "legend": { "calcs": ["sum"], "displayMode": "table", "placement": "right" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT metric_hour as time, SUM(warnings_issued) as \"Warnings\", SUM(mutes_issued) as \"Mutes\", SUM(bans_issued) as \"Bans\" FROM mart_sla_performance WHERE metric_hour >= NOW() - INTERVAL '24 hours' GROUP BY metric_hour ORDER BY metric_hour",
+          "refId": "A",
+          "format": "time_series"
+        }
+      ],
+      "title": "Moderation Actions (24h)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "PostgreSQL",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2
+          },
+          "mappings": [],
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 17 },
+      "id": 11,
+      "options": {
+        "legend": { "calcs": ["sum", "mean"], "displayMode": "table", "placement": "right" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "rawQuery": true,
+          "rawSql": "SELECT metric_hour as time, SUM(completed_tasks) as \"Completed\", SUM(escalated_count) as \"Escalated\", SUM(breached_sla_count) as \"SLA Breached\" FROM mart_sla_performance WHERE metric_hour >= NOW() - INTERVAL '24 hours' GROUP BY metric_hour ORDER BY metric_hour",
+          "refId": "A",
+          "format": "time_series"
+        }
+      ],
+      "title": "Review Outcomes (24h)",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 30,
+  "style": "dark",
+  "tags": ["moderation", "sla", "review"],
+  "templating": { "list": [] },
+  "time": { "from": "now-24h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Content Moderation - SLA Performance",
+  "uid": "moderation-sla",
+  "version": 1
+}
