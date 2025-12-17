@@ -1,7 +1,6 @@
 # Docker Compose for AI Content Moderation Pipeline
 # Includes: PostgreSQL, Redis, Grafana, Prometheus, Flink, LocalStack (AWS simulation)
 
-
 services:
   # ===================
   # Databases
@@ -23,6 +22,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - moderation-network
 
   redis:
     image: redis:7-alpine
@@ -37,6 +38,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - moderation-network
 
   # ===================
   # AWS Simulation (LocalStack)
@@ -45,21 +48,25 @@ services:
     image: localstack/localstack:latest
     container_name: moderation-localstack
     ports:
-      - "4566:4566"
-      - "4510-4559:4510-4559"
+      - "4566:4566"            # Edge port
+      - "4510-4559:4510-4559"  # Service ports
     environment:
-      - SERVICES=sqs,kinesis,dynamodb,lambda,s3
+      - SERVICES=sqs,kinesis,s3 # Only load what we need to save memory
       - DEBUG=1
       - DATA_DIR=/var/lib/localstack/data
       - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:
       - localstack_data:/var/lib/localstack
       - /var/run/docker.sock:/var/run/docker.sock
+      # [FIX] Init script to create buckets/streams on startup
+      - ./aws/init_localstack.sh:/etc/localstack/init/ready.d/init-aws.sh
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - moderation-network
 
   # ===================
   # Stream Processing
@@ -70,8 +77,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
+    networks:
+      - moderation-network
 
   kafka:
     image: confluentinc/cp-kafka:7.4.0
@@ -94,6 +101,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    networks:
+      - moderation-network
 
   flink-jobmanager:
     image: flink:1.17-scala_2.12-java11
@@ -106,24 +115,40 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: flink-jobmanager
         state.backend: rocksdb
-        state.checkpoints.dir: file:///tmp/flink-checkpoints
-        execution.checkpointing.interval: 10000
-    volumes:
-      - flink_data:/tmp/flink-checkpoints
+    networks:
+      - moderation-network
 
   flink-taskmanager:
     image: flink:1.17-scala_2.12-java11
-    #container_name: moderation-flink-taskmanager
     depends_on:
       - flink-jobmanager
     command: taskmanager
+    scale: 2
     environment:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: flink-jobmanager
-        taskmanager.numberOfTaskSlots: 4
+        taskmanager.numberOfTaskSlots: 2
         state.backend: rocksdb
-    scale: 2
+        taskmanager.memory.process.size: 1536m # [FIX] Cap memory per container
+    networks:
+      - moderation-network
+
+  # [FIX] Flink Job Submitter (Ephemeral)
+  flink-job-submitter:
+    image: flink:1.17-scala_2.12-java11
+    container_name: moderation-flink-submitter
+    depends_on:
+      - flink-jobmanager
+      - kafka
+    # Mount your actual compiled JAR here
+    volumes:
+      - ./flink_job/target/moderation-job.jar:/opt/flink/job.jar
+    # Submit job and exit
+    command: >
+      flink run -d -m flink-jobmanager:8081 /opt/flink/job.jar
+    networks:
+      - moderation-network
 
   # ===================
   # Monitoring
@@ -139,12 +164,8 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
-      - '--web.enable-lifecycle'
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9090/-/healthy"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    networks:
+      - moderation-network
 
   grafana:
     image: grafana/grafana:10.0.0
@@ -154,20 +175,14 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-clock-panel
     volumes:
       - grafana_data:/var/lib/grafana
+      # [FIX] Automate dashboard provisioning
       - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
     depends_on:
       - prometheus
-      - postgres
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    networks:
+      - moderation-network
 
   # ===================
   # Application Services
@@ -194,11 +209,10 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      localstack:
+        condition: service_healthy
+    networks:
+      - moderation-network
 
   simulation-runner:
     build:
@@ -207,25 +221,23 @@ services:
     container_name: moderation-simulation
     environment:
       - DATABASE_URL=postgresql://moderation:moderation_secret@postgres:5432/content_moderation
-      - REDIS_URL=redis://redis:6379
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - SIMULATION_DURATION=300
-      - CONTENT_RATE=50
-      - CHAT_RATE=100
     depends_on:
       - moderation-api
       - kafka
     profiles:
       - simulation
+    networks:
+      - moderation-network
 
 volumes:
   postgres_data:
   redis_data:
   localstack_data:
-  flink_data:
   prometheus_data:
   grafana_data:
 
 networks:
-  default:
-    name: moderation-network
+  moderation-network:
+    driver: bridge
