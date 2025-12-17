@@ -1,7 +1,6 @@
 # Docker Compose for AI Content Moderation Pipeline
 # Includes: PostgreSQL, Redis, Grafana, Prometheus, Flink, LocalStack (AWS simulation)
 
-version: '3.8'
 
 services:
   # ===================
@@ -114,7 +113,7 @@ services:
 
   flink-taskmanager:
     image: flink:1.17-scala_2.12-java11
-    container_name: moderation-flink-taskmanager
+    #container_name: moderation-flink-taskmanager
     depends_on:
       - flink-jobmanager
     command: taskmanager
