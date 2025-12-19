@@ -10,7 +10,7 @@ This document traces data from production sources through all components: Kafka/
 ### Sources (Two Parallel Flows)
 
 #### Flow A: Asynchronous Content (Forum Posts, Images, Profiles)
-\`\`\`
+```
 User Submits Content
   ↓
 ContentStreamProducer.send_content()
@@ -19,10 +19,10 @@ Kinesis Stream (content_moderation_stream)
   ├─ Partition Key: user_id (ensures ordering per user)
   ├─ Shard Distribution: 4 shards across user_id hash
   └─ Record Format: StreamEvent(event_type=content_submitted, payload={content_id, user_id, text_content, image_url, created_at})
-\`\`\`
+```
 
 **Kinesis Record Structure:**
-\`\`\`json
+```json
 {
   "event_type": "content_submitted",
   "source": "kinesis",
@@ -36,10 +36,10 @@ Kinesis Stream (content_moderation_stream)
     "created_at": "2025-01-15T10:30:00Z"
   }
 }
-\`\`\`
+```
 
 #### Flow B: Real-time Chat (Live Game Chat)
-\`\`\`
+```
 Chat Message Sent by User
   ↓
 ChatStreamProducer.send_message()
@@ -48,7 +48,7 @@ Kinesis Stream (realtime_chat_stream)
   ├─ Partition Key: channel_id (ensures ordering per channel)
   ├─ Shard Distribution: 4 shards
   └─ Record Format: StreamEvent(event_type=chat_message, payload={message_id, user_id, channel_id, text, timestamp})
-\`\`\`
+```
 
 ---
 
@@ -56,7 +56,7 @@ Kinesis Stream (realtime_chat_stream)
 
 ### Flow A: Async Processing Pipeline
 
-\`\`\`
+```
 ┌─────────────────────────────────────────────────────────────┐
 │ KINESIS CONSUMER (Enhanced Fan-Out)                         │
 │ - Polls kinesis_consumer stream every 0.1s                  │
@@ -89,7 +89,7 @@ TRIAGE              ML SCORING        (Step Functions)
                            Human Moderator Reviews
                                     ↓
                            review_decisions table
-\`\`\`
+```
 
 **What Gets Stored at Each Stage:**
 
@@ -122,7 +122,7 @@ TRIAGE              ML SCORING        (Step Functions)
 
 ### Flow B: Real-time Stream Processing (< 10ms)
 
-\`\`\`
+```
 ┌──────────────────────────────────────────────────────┐
 │ KINESIS CONSUMER (realtime_chat_stream)              │
 │ - Consumes at ~1000 msg/sec                          │
@@ -156,7 +156,7 @@ TRIAGE              ML SCORING        (Step Functions)
     (display in chat)     (silently drop)
                               ↓
          Write to PostgreSQL `realtime_decisions`
-\`\`\`
+```
 
 **What Gets Stored:**
 - PostgreSQL `chat_messages` (partitioned by date)
@@ -169,7 +169,7 @@ TRIAGE              ML SCORING        (Step Functions)
 
 After data lands in PostgreSQL, dbt models transform it for analytics:
 
-\`\`\`
+```
 Raw Tables (from services)
   ├─ content
   ├─ moderation_results
@@ -197,12 +197,12 @@ Raw Tables (from services)
   │
   └─ mart_user_risk_analysis
       (user risk scores, ban recommendations)
-\`\`\`
+```
 
 **Key dbt Models:**
 
 ### `stg_content` → Cleans and standardizes content
-\`\`\`sql
+```sql
 SELECT
   id, user_id, content_type, status,
   TEXT_LENGTH(text_content) as text_length,
@@ -210,10 +210,10 @@ SELECT
   created_at, updated_at
 FROM content
 WHERE created_at >= (CURRENT_DATE - INTERVAL '90 DAYS')
-\`\`\`
+```
 
 ### `int_content_with_results` → Joins all moderation data
-\`\`\`sql
+```sql
 SELECT
   c.id, c.user_id, c.content_type, c.status,
   mr.decision, mr.severity, mr.violations,
@@ -225,10 +225,10 @@ FROM stg_content c
 LEFT JOIN stg_moderation_results mr ON c.id = mr.content_id
 LEFT JOIN ml_scores ms ON mr.id = ms.moderation_result_id
 LEFT JOIN image_analysis ra ON mr.id = ra.moderation_result_id
-\`\`\`
+```
 
 ### `mart_moderation_metrics_hourly` → Dashboard metrics
-\`\`\`sql
+```sql
 SELECT
   DATE_TRUNC('hour', mr.created_at) as metric_hour,
   COUNT(*) as total_content_processed,
@@ -239,7 +239,7 @@ SELECT
   AVG(mr.processing_time_ms) as avg_latency
 FROM int_content_with_results mr
 GROUP BY 1
-\`\`\`
+```
 
 ---
 
@@ -247,7 +247,7 @@ GROUP BY 1
 
 Services and Flink also write metrics:
 
-\`\`\`
+```
 ModerationService.metrics
 ├─ total_processed: 15,234
 ├─ tier1_decisions: 12,100
@@ -271,13 +271,13 @@ ReputationService.violations
 └─ ban recommendations
           ↓
    → PostgreSQL `user_reputation` + `violation_history`
-\`\`\`
+```
 
 ---
 
 ## Phase 5: Grafana & Monitoring
 
-\`\`\`
+```
 PostgreSQL Tables
 ├─ mart_moderation_metrics_hourly ─┐
 ├─ mart_sla_performance ────────────┤
@@ -332,10 +332,10 @@ PostgreSQL Tables
             │ (Refresh every 5-10s)
             │
     Accessed by: DevOps, Platform Team, Management
-\`\`\`
+```
 
 **Grafana Query Example (PostgreSQL datasource):**
-\`\`\`sql
+```sql
 -- For Throughput Chart
 SELECT
   metric_hour,
@@ -344,13 +344,13 @@ SELECT
 FROM metrics_hourly
 WHERE metric_hour >= now() - INTERVAL '24 hours'
 ORDER BY metric_hour
-\`\`\`
+```
 
 ---
 
 ## Phase 6: Next.js Admin Dashboard
 
-\`\`\`
+```
 Next.js Dashboard (React + SWR)
 ├─ useEffect + fetch (or SWR hook)
 │
@@ -377,10 +377,10 @@ Next.js Dashboard (React + SWR)
     ├─ ModerationQueue (Review tasks with SLA countdown)
     ├─ RealtimePanel (Live chat stream simulation)
     └─ SLAGauge (Gauge widget for compliance%)
-\`\`\`
+```
 
 **Next.js API Route Example:**
-\`\`\`typescript
+```typescript
 // /api/dashboard/metrics
 import { query } from '@/lib/db'
 
@@ -400,13 +400,13 @@ export async function GET() {
   `)
   return Response.json(result.rows)
 }
-\`\`\`
+```
 
 ---
 
 ## Data Flow Diagram (End-to-End)
 
-\`\`\`
+```
 ┌──────────────────────────────────────────────────────────────────────────┐
 │                         DATA PRODUCTION                                   │
 │  User Posts | User Chats | User Images | User Profiles                  │
@@ -472,7 +472,7 @@ export async function GET() {
     │DASHBOARDS      │ DASHBOARD│
     │(Real-time)     │(Admin UI)│
     └─────────┘      └──────────┘
-\`\`\`
+```
 
 ---
 
@@ -492,7 +492,7 @@ export async function GET() {
 ## Example Data Journey
 
 ### Forum Post Scenario:
-\`\`\`
+```
 1. User posts: "Check this cool link!"
    └─ ContentStreamProducer sends to Kinesis
 
@@ -527,10 +527,10 @@ export async function GET() {
 
 10. Next.js dashboard fetches via API
     └─ Queue panel shows new URGENT task with 15m SLA
-\`\`\`
+```
 
 ### Live Chat Scenario:
-\`\`\`
+```
 1. User types: "hate this game!!!" in channel
    └─ ChatStreamProducer sends to Kinesis
 
@@ -562,14 +562,14 @@ export async function GET() {
 
 9. Next.js dashboard (if streaming):
    └─ Real-time panel updates with blocked message
-\`\`\`
+```
 
 ---
 
 ## Queue & DLQ Handling
 
 ### SQS Dead Letter Queue (Flow A):
-\`\`\`
+```
 Content rejected at SQS Consumer
   └─ Failed 3 times (visibility timeout)
   └─ Sent to DLQ: content_moderation_dlq
@@ -584,10 +584,10 @@ Example DLQ Message:
   "failed_at": "2025-01-15T10:30:00Z",
   "retry_count": 3
 }
-\`\`\`
+```
 
 ### Flink Watermark & Late Data:
-\`\`\`
+```
 Event time: 10:30:00
 Watermark: 10:29:50
 Late message arrives at: 10:31:00
@@ -595,7 +595,7 @@ Late message arrives at: 10:31:00
   └─ Assigned to: session window (by gap)
   └─ Recorded: metrics.late_records += 1
   └─ Grafana: "Late Records" counter increments
-\`\`\`
+```
 
 ---
 
@@ -609,6 +609,6 @@ Late message arrives at: 10:31:00
 | **Alerts** | Grafana rules (on metrics) | 1m | SLA/health monitoring |
 | **Reports** | dbt models (daily aggregation) | Daily | Business analytics |
 
-\`\`\`
+```
 
 </markdown file="docs/DATA_FLOW_ARCHITECTURE.md">

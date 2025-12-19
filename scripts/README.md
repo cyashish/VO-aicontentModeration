@@ -18,7 +18,7 @@ This system implements a dual-flow architecture for content moderation:
 
 ## Project Structure
 
-\`\`\`
+```
 scripts/
 ├── models/                    # Python data models (Pydantic)
 │   ├── enums.py              # Enums for content types, severity, etc.
@@ -63,16 +63,16 @@ scripts/
 │   └── pipeline_runner.py    # Full pipeline orchestration
 │
 └── docker-compose.yml         # Full stack deployment
-\`\`\`
+```
 
 ## Quick Start
 
 ### 1. Start Infrastructure
 
-\`\`\`bash
+```bash
 cd scripts
 docker-compose up -d
-\`\`\`
+```
 
 This starts:
 - PostgreSQL (port 5432)
@@ -85,28 +85,28 @@ This starts:
 
 ### 2. Initialize Database
 
-\`\`\`bash
+```bash
 # Connect to PostgreSQL and run schema
 psql -h localhost -U moderation -d content_moderation -f database/001_schema.sql
-\`\`\`
+```
 
 ### 3. Run dbt Models
 
-\`\`\`bash
+```bash
 cd dbt
 dbt run --profiles-dir .
-\`\`\`
+```
 
 ### 4. Run Simulation
 
-\`\`\`bash
+```bash
 # Start simulation pipeline
 python -m simulation.pipeline_runner
 
 # Or run individual components:
 python -m simulation.content_generator
 python -m simulation.realtime_chat_simulator
-\`\`\`
+```
 
 ### 5. Access Dashboards
 
@@ -160,7 +160,7 @@ Sub-10ms chat moderation:
 
 ### Environment Variables
 
-\`\`\`bash
+```bash
 # Database
 DATABASE_URL=postgresql://user:pass@localhost:5432/content_moderation
 
@@ -180,11 +180,11 @@ AWS_DEFAULT_REGION=us-east-1
 SIMULATION_DURATION=300
 CONTENT_RATE=50
 CHAT_RATE=100
-\`\`\`
+```
 
 ### Simulation Config
 
-\`\`\`python
+```python
 from simulation import PipelineConfig
 
 config = PipelineConfig(
@@ -195,7 +195,7 @@ config = PipelineConfig(
     enable_attacks=True,
     attack_interval_seconds=30,
 )
-\`\`\`
+```
 
 ## Metrics & Monitoring
 
@@ -222,9 +222,9 @@ config = PipelineConfig(
 
 ### Running Tests
 
-\`\`\`bash
+```bash
 pytest tests/ -v
-\`\`\`
+```
 
 ### Adding New Violation Types
 

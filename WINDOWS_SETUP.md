@@ -13,34 +13,34 @@
    - Or use: `cd path\to\ai-moderation`
 
 4. **Run the push script**:
-   \`\`\`powershell
+   ```powershell
    .\scripts\push-to-github.ps1
-   \`\`\`
+   ```
 
    If you get an execution policy error, run:
-   \`\`\`powershell
+   ```powershell
    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
    .\scripts\push-to-github.ps1
-   \`\`\`
+   ```
 
 ### Option 2: Using Command Prompt
 
 1. **Open Command Prompt** in the project directory
 
 2. **Run the batch script**:
-   \`\`\`cmd
+   ```cmd
    scripts\push-to-github.bat
-   \`\`\`
+   ```
 
 ### Option 3: Manual Git Commands
 
-\`\`\`cmd
+```cmd
 git init
 git add .
 git commit -m "Add complete AI moderation system"
 git remote add origin https://github.com/YOUR_USERNAME/VO-aicontentModeration.git
 git push -u origin main
-\`\`\`
+```
 
 ---
 
@@ -64,19 +64,19 @@ git push -u origin main
 1. **Open PowerShell or Command Prompt** in the project directory
 
 2. **Start all services**:
-   \`\`\`cmd
+   ```cmd
    docker-compose up -d
-   \`\`\`
+   ```
 
 3. **Initialize the database**:
-   \`\`\`cmd
+   ```cmd
    docker-compose exec postgres psql -U postgres -d moderation -f /docker-entrypoint-initdb.d/001_schema.sql
-   \`\`\`
+   ```
 
 4. **Start the simulation**:
-   \`\`\`cmd
+   ```cmd
    docker-compose --profile simulation up -d simulation-runner
-   \`\`\`
+   ```
 
 ### Access Dashboards
 
@@ -88,7 +88,7 @@ git push -u origin main
 
 ### View Logs
 
-\`\`\`cmd
+```cmd
 # All services
 docker-compose logs -f
 
@@ -96,20 +96,20 @@ docker-compose logs -f
 docker-compose logs -f simulation-runner
 docker-compose logs -f flink-jobmanager
 docker-compose logs -f postgres
-\`\`\`
+```
 
 ### Stop the System
 
-\`\`\`cmd
+```cmd
 docker-compose down
-\`\`\`
+```
 
 ### Troubleshooting
 
 **Issue: PowerShell script won't run**
-\`\`\`powershell
+```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-\`\`\`
+```
 
 **Issue: Docker not found**
 - Make sure Docker Desktop is running
@@ -129,15 +129,15 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 ### Install Python Dependencies
 
-\`\`\`cmd
+```cmd
 python -m venv venv
 venv\Scripts\activate
 pip install -r scripts\requirements.txt
-\`\`\`
+```
 
 ### Run Individual Services Locally
 
-\`\`\`cmd
+```cmd
 # Activate virtual environment
 venv\Scripts\activate
 
@@ -146,11 +146,11 @@ python scripts\simulation\pipeline_runner.py
 
 # Run Flink processor
 python scripts\streaming\flink_processor.py
-\`\`\`
+```
 
 ### Database Connection (Local)
 
-\`\`\`cmd
+```cmd
 # Connect to PostgreSQL in Docker
 docker-compose exec postgres psql -U postgres -d moderation
 
@@ -160,7 +160,7 @@ docker-compose exec postgres psql -U postgres -d moderation
 # Database: moderation
 # User: postgres
 # Password: postgres
-\`\`\`
+```
 
 ---
 

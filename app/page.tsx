@@ -8,12 +8,12 @@ import { ViolationChart } from "@/components/dashboard/violation-chart"
 import { ModerationQueue } from "@/components/dashboard/moderation-queue"
 import { RealtimePanel } from "@/components/dashboard/realtime-panel"
 import { SLAGauge } from "@/components/dashboard/sla-gauge"
-import { generateMockMetrics, type ModerationMetrics } from "@/lib/mock-data"
+import { generateMockMetrics } from "@/lib/mock-data"
 import { Activity, CheckCircle, XCircle, Clock, Zap, Target } from "lucide-react"
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview")
-  const [metrics, setMetrics] = useState<ModerationMetrics | null>(null)
+  const [metrics, setMetrics] = useState<ReturnType<typeof generateMockMetrics> | null>(null)
 
   useEffect(() => {
     setMetrics(generateMockMetrics())
@@ -23,7 +23,7 @@ export default function DashboardPage() {
     return () => clearInterval(interval)
   }, [])
 
-  if (!metrics) return null
+  if (!metrics) return <div className="flex h-screen items-center justify-center bg-background">Loading...</div>
 
   return (
     <div className="flex h-screen bg-background">

@@ -13,10 +13,10 @@
 ## Part 1: Spin Up the Stack
 
 ### Step 1: Start All Services (5 minutes)
-\`\`\`bash
+```bash
 cd scripts
 docker-compose up -d
-\`\`\`
+```
 
 This starts all 12 services:
 - PostgreSQL (5432) - Data storage
@@ -29,12 +29,12 @@ This starts all 12 services:
 - LocalStack (4566) - AWS simulation
 
 ### Step 2: Initialize Database
-\`\`\`bash
+```bash
 docker-compose exec postgres psql -U moderation -d content_moderation -f /docker-entrypoint-initdb.d/001_schema.sql
-\`\`\`
+```
 
 ### Step 3: Verify Services Health
-\`\`\`bash
+```bash
 docker-compose ps
 # All services should show "healthy" or "running"
 
@@ -42,14 +42,14 @@ docker-compose ps
 curl http://localhost:9090/-/healthy          # Prometheus
 curl http://localhost:3001/api/health         # Grafana
 curl http://localhost:8081/config             # Flink
-\`\`\`
+```
 
 ---
 
 ## Part 2: Watch Data Flow in Real-Time
 
 ### Tab 1: Monitor PostgreSQL (see raw data being inserted)
-\`\`\`bash
+```bash
 docker-compose exec postgres psql -U moderation -d content_moderation
 
 # Inside psql:
@@ -57,16 +57,16 @@ SELECT count(*) FROM content;                              # Total items submitt
 SELECT count(*) FROM moderation_results;                   # Total decisions made
 SELECT count(*) FROM review_tasks WHERE status = 'pending'; # Human review queue
 SELECT * FROM moderation_results ORDER BY created_at DESC LIMIT 5;  # Latest decisions
-\`\`\`
+```
 
 ### Tab 2: Monitor Kafka (see events flowing)
-\`\`\`bash
+```bash
 docker-compose exec kafka kafka-console-consumer --bootstrap-server localhost:9092 \
   --topic content-stream --from-beginning --max-messages 100
 
 docker-compose exec kafka kafka-console-consumer --bootstrap-server localhost:9092 \
   --topic chat-stream --from-beginning --max-messages 100
-\`\`\`
+```
 
 ### Tab 3: Monitor Flink Jobs (stream processing)
 Open in browser: http://localhost:8081
@@ -96,16 +96,16 @@ Navigate to:
 ## Part 3: Run the Simulation
 
 ### Start the Simulation (generates data)
-\`\`\`bash
+```bash
 docker-compose --profile simulation up -d simulation-runner
-\`\`\`
+```
 
 This immediately starts:
 - **Flow A**: Forum posts being generated and moderated asynchronously
 - **Flow B**: Real-time chat messages being processed at sub-10ms latency
 
 ### Watch Simulation Logs
-\`\`\`bash
+```bash
 docker-compose logs -f simulation-runner
 
 # Output shows:
@@ -115,14 +115,14 @@ docker-compose logs -f simulation-runner
 #   Flow A: 100 items, 20.0/s, 150.2ms avg
 #   Flow B: 500 msgs, 100.0/s, 8.3ms avg
 # [ATTACK] Triggered spam attack on channel abc...
-\`\`\`
+```
 
 ---
 
 ## Part 4: Understand the Data Journey
 
 ### Forum Post (Flow A) Journey
-\`\`\`
+```
 1. ContentGenerator creates post
    → Type: forum_post, Score: random 0-1
    → Stored in Kafka topic: content-stream
@@ -147,10 +147,10 @@ docker-compose logs -f simulation-runner
 
 6. Grafana queries marts every 5s
    → Displays updated charts and metrics
-\`\`\`
+```
 
 ### Live Chat Message (Flow B) Journey
-\`\`\`
+```
 1. ChatSimulator generates message
    → Channel: 5-char ID, Content: random text
    → Sent to Kafka topic: chat-stream
@@ -177,7 +177,7 @@ docker-compose logs -f simulation-runner
 6. Grafana displays live
    → Real-time Chat dashboard
    → Message volume, block rate, latency tracking
-\`\`\`
+```
 
 ---
 
@@ -197,7 +197,7 @@ docker-compose logs -f simulation-runner
 ### Common Queries
 
 **PostgreSQL - Check data flow:**
-\`\`\`sql
+```sql
 -- Count by minute
 SELECT date_trunc('minute', created_at) AS minute, count(*) 
 FROM moderation_results 
@@ -214,14 +214,14 @@ SELECT
   percentile_cont(0.95) WITHIN GROUP (ORDER BY processing_time_ms) AS p95,
   percentile_cont(0.99) WITHIN GROUP (ORDER BY processing_time_ms) AS p99
 FROM moderation_results;
-\`\`\`
+```
 
 **Prometheus - Check throughput:**
-\`\`\`
+```
 # Query in Prometheus UI
 rate(flink_taskmanager_job_task_operator_records_in_total[1m])
 rate(flink_taskmanager_job_task_operator_records_out_total[1m])
-\`\`\`
+```
 
 **Grafana - Real-time alerts:**
 - Set alert: "Throughput < 10/s for 5 minutes"
@@ -233,7 +233,7 @@ rate(flink_taskmanager_job_task_operator_records_out_total[1m])
 ## Part 6: Troubleshooting
 
 ### No data flowing?
-\`\`\`bash
+```bash
 # Check Kafka topics exist
 docker-compose exec kafka kafka-topics --bootstrap-server localhost:9092 --list
 
@@ -247,13 +247,13 @@ from sqlalchemy import create_engine
 engine = create_engine('postgresql://moderation:moderation_secret@postgres:5432/content_moderation')
 print('Connected:', engine.connect())
 "
-\`\`\`
+```
 
 ### Flink job not running?
-\`\`\`bash
+```bash
 docker-compose logs flink-jobmanager
 docker-compose exec flink-jobmanager curl http://localhost:8081/v1/jobs
-\`\`\`
+```
 
 ### Grafana dashboards not showing data?
 1. Check datasource: http://localhost:3001/datasources
@@ -265,7 +265,7 @@ docker-compose exec flink-jobmanager curl http://localhost:8081/v1/jobs
 ## Part 7: Simulation Controls
 
 ### Adjust simulation parameters:
-\`\`\`bash
+```bash
 # Edit docker-compose.yml environment for simulation-runner:
 CONTENT_RATE=100        # Higher = more items/sec
 CHAT_RATE=200           # Higher = more messages/sec
@@ -273,10 +273,10 @@ SIMULATION_DURATION=600 # Run for 10 minutes
 
 # Restart
 docker-compose up -d simulation-runner
-\`\`\`
+```
 
 ### Trigger manual attacks:
-\`\`\`bash
+```bash
 # SSH into simulation container
 docker-compose exec moderation-simulation bash
 
@@ -286,7 +286,7 @@ from simulation.realtime_chat_simulator import RealtimeChatSimulator
 sim = RealtimeChatSimulator()
 sim.trigger_attack('spam')
 "
-\`\`\`
+```
 
 ---
 
@@ -311,27 +311,27 @@ Use this to validate everything is working:
 **Scenario**: Watch 1 forum post flow through the entire system
 
 ### Terminal 1: Trigger one post
-\`\`\`bash
+```bash
 docker exec moderation-api python -c "
 from simulation.content_generator import ContentGenerator
 gen = ContentGenerator()
 post = gen.generate_content()
 print(f'Generated: {post.content_id}')
 "
-\`\`\`
+```
 
 ### Terminal 2: Watch Kafka
-\`\`\`bash
+```bash
 docker-compose exec kafka kafka-console-consumer \
   --bootstrap-server localhost:9092 --topic content-stream \
   --max-messages 1 --timeout-ms 5000
-\`\`\`
+```
 
 ### Terminal 3: Monitor PostgreSQL
-\`\`\`bash
+```bash
 watch -n 1 "docker-compose exec postgres psql -U moderation \
   -d content_moderation -c 'SELECT count(*) FROM moderation_results;'"
-\`\`\`
+```
 
 ### Terminal 4: View Grafana
 - Refresh dashboard at http://localhost:3001/d/moderation-overview

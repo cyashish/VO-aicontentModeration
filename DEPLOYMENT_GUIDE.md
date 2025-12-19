@@ -37,13 +37,13 @@ This repository contains a complete multi-region, event-driven AI content modera
 Click the three dots in the top right of v0 → "Download ZIP"
 
 ### **Step 2: Extract and Navigate**
-\`\`\`bash
+```bash
 unzip ai-moderation.zip
 cd ai-moderation
-\`\`\`
+```
 
 ### **Step 3: Push to GitHub**
-\`\`\`bash
+```bash
 # Initialize git (if not already initialized)
 git init
 
@@ -58,10 +58,10 @@ git remote add origin https://github.com/YOUR_USERNAME/VO-aicontentModeration.gi
 
 # Push to main branch
 git push -u origin main
-\`\`\`
+```
 
 ### **Step 4: Start the System Locally**
-\`\`\`bash
+```bash
 # Start infrastructure
 cd scripts
 docker-compose up -d
@@ -73,7 +73,7 @@ pip install -r requirements.txt
 
 # Run simulation
 python simulation/pipeline_runner.py
-\`\`\`
+```
 
 ### **Step 5: Access Dashboards**
 - **Grafana**: http://localhost:3001 (admin/admin)
@@ -86,7 +86,7 @@ python simulation/pipeline_runner.py
 ## 📊 Monitoring Data Flow
 
 ### **Watch Live Data**
-\`\`\`bash
+```bash
 # Terminal 1: Simulation logs
 docker-compose logs -f simulation-runner
 
@@ -104,13 +104,13 @@ docker exec -it postgres psql -U moderator -d moderation -c \
 
 # Terminal 5: Grafana dashboards
 # Visit http://localhost:3001
-\`\`\`
+```
 
 ---
 
 ## 🏗️ Architecture Summary
 
-\`\`\`
+```
 ┌─────────────┐
 │   Users     │
 └──────┬──────┘
@@ -154,13 +154,13 @@ docker exec -it postgres psql -U moderator -d moderation -c \
    │ Grafana │         │  Next.js UI  │
    │ (5s)    │         │  (Real-time) │
    └─────────┘         └──────────────┘
-\`\`\`
+```
 
 ---
 
 ## 📁 Repository Structure
 
-\`\`\`
+```
 ai-moderation/
 ├── app/                          # Next.js frontend
 │   ├── page.tsx                 # Main dashboard
@@ -211,7 +211,7 @@ ai-moderation/
 │   ├── SETUP_AND_MONITORING.md
 │   └── DATA_ROUTING_DEEP_DIVE.md
 └── README.md
-\`\`\`
+```
 
 ---
 
@@ -219,7 +219,7 @@ ai-moderation/
 
 ### **Environment Variables**
 Create `.env` file in `scripts/`:
-\`\`\`bash
+```bash
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 POSTGRES_DB=moderation
@@ -234,7 +234,7 @@ REDIS_PORT=6379
 AWS_REGION=us-east-1
 KINESIS_STREAM_NAME=content-moderation-stream
 SQS_QUEUE_URL=https://sqs.us-east-1.amazonaws.com/xxx/moderation-queue
-\`\`\`
+```
 
 ### **Scaling Configuration**
 Edit `docker-compose.yml` to scale:
@@ -247,16 +247,16 @@ Edit `docker-compose.yml` to scale:
 ## 🧪 Testing
 
 ### **Run Unit Tests**
-\`\`\`bash
+```bash
 cd scripts
 pytest tests/
-\`\`\`
+```
 
 ### **Load Testing**
-\`\`\`bash
+```bash
 # Generate high volume
 python simulation/pipeline_runner.py --rate=1000 --duration=600
-\`\`\`
+```
 
 ### **Verify SLA**
 Check Grafana → SLA Performance dashboard for:

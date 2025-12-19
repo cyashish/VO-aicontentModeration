@@ -4,7 +4,7 @@
 
 ### Every decision creates records in 3+ tables:
 
-\`\`\`
+```
 moderation_result {
   id: UUID
   content_id: UUID
@@ -39,13 +39,13 @@ review_tasks {
   created_at: timestamp
   completed_at: timestamp
 }
-\`\`\`
+```
 
 ## DLQ (Dead Letter Queue) Handling
 
 When errors occur during moderation:
 
-\`\`\`
+```
 dead_letter_queue {
   id: UUID
   original_content_id: UUID
@@ -61,12 +61,12 @@ Retry logic:
 2nd error → retry at +30 seconds  
 3rd error → retry at +2 minutes
 4th error → manual review
-\`\`\`
+```
 
 ## dbt Transformation Layers
 
 ### Staging Layer (raw cleaning)
-\`\`\`sql
+```sql
 stg_moderation_results:
 - Remove duplicates
 - Fill nulls
@@ -81,10 +81,10 @@ stg_content:
 stg_review_tasks:
 - Calculate SLA windows (1h, 4h, 24h based on priority)
 - Assign urgency scores
-\`\`\`
+```
 
 ### Intermediate Layer (business logic)
-\`\`\`sql
+```sql
 int_content_with_results:
 - JOIN content + moderation_results
 - JOIN with ml_scores
@@ -92,10 +92,10 @@ int_content_with_results:
 - Calculate risk scores from violation history
 
 Result: Complete context for each decision
-\`\`\`
+```
 
 ### Mart Layer (analytics-ready)
-\`\`\`sql
+```sql
 mart_moderation_metrics_hourly:
 - Aggregations by hour
 - Metrics: throughput, approval_rate, avg_latency
@@ -113,12 +113,12 @@ mart_user_risk_analysis:
 - Risk score calculation
 - Trend detection (escalating patterns)
 - Used by: User management dashboard
-\`\`\`
+```
 
 ## Message Flow Through Kafka Topics
 
 ### Topic: content-stream (Flow A)
-\`\`\`
+```
 Partition key: user_id
 Message:
 {
@@ -137,10 +137,10 @@ Consumers:
 1. ModerationService (pulls batches of 50)
 2. Analytics ETL (copies to PostgreSQL raw table)
 3. Backup archival (copies to S3)
-\`\`\`
+```
 
 ### Topic: chat-stream (Flow B)
-\`\`\`
+```
 Partition key: channel_id
 Message:
 {
@@ -158,10 +158,10 @@ Message:
 Consumers:
 1. FlinkProcessor (all messages, <10ms processing)
 2. Backup archival
-\`\`\`
+```
 
 ### Topic: moderation-decisions (results)
-\`\`\`
+```
 Producers: ModerationService, FlinkService
 Partition key: content_id
 
@@ -183,12 +183,12 @@ Consumers:
 1. PostgreSQL sink (writes to moderation_results)
 2. dbt pipeline (processes nightly)
 3. Real-time alerts (Prometheus metrics)
-\`\`\`
+```
 
 ## Stream Processing (Flink) Operators
 
 ### Window Processing
-\`\`\`python
+```python
 # 5-second tumbling windows
 KeyedStream
   .timeWindow(Time.seconds(5))
@@ -202,10 +202,10 @@ KeyedStream
   .sessionWindow(Time.seconds(30))
   .apply(ConversationAnalyzer)
   .addSink(PostgreSQL)
-\`\`\`
+```
 
 ### State Management
-\`\`\`python
+```python
 State backend: RocksDB (disk-backed)
 Checkpoint interval: 10 seconds
 State TTL: 24 hours
@@ -214,22 +214,22 @@ Stored state:
 - Per-user: last_10_messages (for pattern detection)
 - Per-channel: message_counts (for burst detection)
 - Per-content: processing_attempts (for retry logic)
-\`\`\`
+```
 
 ## How Grafana Queries the Data
 
 ### MetricCard Updates (every 5s)
-\`\`\`sql
+```sql
 SELECT 
   COUNT(*) as total_processed,
   SUM(CASE WHEN final_decision='approved' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) as approval_rate,
   AVG(processing_time_ms) as avg_latency
 FROM moderation_results
 WHERE created_at > now() - interval '1 hour'
-\`\`\`
+```
 
 ### ThroughputChart Updates (every 5s)
-\`\`\`sql
+```sql
 SELECT 
   date_trunc('minute', created_at) as minute,
   COUNT(*) as throughput,
@@ -238,10 +238,10 @@ FROM moderation_results
 WHERE created_at > now() - interval '24 hours'
 GROUP BY 1
 ORDER BY 1 DESC
-\`\`\`
+```
 
 ### ViolationChart (every 10s)
-\`\`\`sql
+```sql
 SELECT 
   violation_type,
   COUNT(*) as count
@@ -249,22 +249,22 @@ FROM violations
 WHERE created_at > now() - interval '24 hours'
 GROUP BY 1
 ORDER BY 2 DESC
-\`\`\`
+```
 
 ### SLAGauge (every 15s)
-\`\`\`sql
+```sql
 SELECT 
   priority_level,
   COUNT(*) FILTER (WHERE resolved_at - created_at <= sla_threshold) * 100.0 / COUNT(*) as sla_compliance
 FROM review_tasks
 WHERE created_at > now() - interval '7 days'
 GROUP BY 1
-\`\`\`
+```
 
 ## Alert Routing
 
 ### From Prometheus to Grafana
-\`\`\`
+```
 Prometheus scrapes services every 15s
 ↓
 Detects metric anomalies
@@ -276,21 +276,21 @@ Sends to Alert Manager
 Grafana displays alert notification
 ↓
 Optionally routes to PagerDuty/Slack
-\`\`\`
+```
 
 ### Example Alert
-\`\`\`yaml
+```yaml
 alert: HighLatencySpikeFlow B
 expr: flink_operator_watermark_delay > 50  # ms
 for: 5m
 annotations:
   summary: "Real-time latency spike detected"
   dashboard: "http://localhost:3001/d/realtime-chat"
-\`\`\`
+```
 
 ## Data Retention Policies
 
-\`\`\`sql
+```sql
 -- Hot storage (PostgreSQL): 30 days
 DELETE FROM chat_messages WHERE created_at < now() - interval '30 days';
 
@@ -301,7 +301,7 @@ DELETE FROM chat_messages WHERE created_at < now() - interval '30 days';
 -- Archive to Glacier for compliance
 
 -- Marts: materialized daily, keep 2 years
-\`\`\`
+```
 
 This architecture ensures data:
 1. **Flows quickly** (Kafka → Flink → DB in <100ms)
