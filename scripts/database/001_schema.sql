@@ -201,6 +201,9 @@ CREATE TABLE IF NOT EXISTS chat_messages_2025_01 PARTITION OF chat_messages
 CREATE TABLE IF NOT EXISTS chat_messages_2025_02 PARTITION OF chat_messages
     FOR VALUES FROM ('2025-02-01') TO ('2025-03-01');
 
+-- Default partition so inserts don't fail outside pre-created months (dev convenience)
+CREATE TABLE IF NOT EXISTS chat_messages_default PARTITION OF chat_messages DEFAULT;
+
 -- Real-time decisions
 CREATE TABLE IF NOT EXISTS realtime_decisions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

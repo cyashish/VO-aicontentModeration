@@ -8,18 +8,37 @@ import { ViolationChart } from "@/components/dashboard/violation-chart"
 import { ModerationQueue } from "@/components/dashboard/moderation-queue"
 import { RealtimePanel } from "@/components/dashboard/realtime-panel"
 import { SLAGauge } from "@/components/dashboard/sla-gauge"
-import { generateMockMetrics } from "@/lib/mock-data"
+import { fetchMetrics } from "@/lib/api-client"
 import { Activity, CheckCircle, XCircle, Clock, Zap, Target } from "lucide-react"
+
+type DashboardMetrics = {
+  totalProcessed: number
+  approvedCount: number
+  rejectedCount: number
+  pendingReview: number
+  avgLatencyMs: number
+  throughputPerSec: number
+  slaCompliance: number
+}
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview")
-  const [metrics, setMetrics] = useState<ReturnType<typeof generateMockMetrics> | null>(null)
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null)
 
   useEffect(() => {
-    setMetrics(generateMockMetrics())
-    const interval = setInterval(() => {
-      setMetrics(generateMockMetrics())
-    }, 5000)
+    let cancelled = false
+
+    const load = async () => {
+      try {
+        const data = (await fetchMetrics()) as DashboardMetrics
+        if (!cancelled) setMetrics(data)
+      } catch (e) {
+        console.error("Failed to load metrics", e)
+      }
+    }
+
+    load()
+    const interval = setInterval(load, 5000)
     return () => clearInterval(interval)
   }, [])
 

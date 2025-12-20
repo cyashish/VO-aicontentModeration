@@ -2,8 +2,9 @@ import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
+    const baseUrl = process.env.DATABASE_API_URL ?? "http://localhost:8000"
     // Query PostgreSQL for recent real-time decisions
-    const realtimeData = await fetch(`${process.env.DATABASE_API_URL}/realtime/recent`, { cache: "no-store" }).then(
+    const realtimeData = await fetch(`${baseUrl}/realtime/recent`, { cache: "no-store" }).then(
       (res) => res.json(),
     )
 

@@ -6,8 +6,10 @@ export async function GET(request: Request) {
     const priority = searchParams.get("priority")
     const limit = searchParams.get("limit") || "50"
 
+    const baseUrl = process.env.DATABASE_API_URL ?? "http://localhost:8000"
+
     // Query PostgreSQL for review queue
-    const queue = await fetch(`${process.env.DATABASE_API_URL}/queue?priority=${priority}&limit=${limit}`, {
+    const queue = await fetch(`${baseUrl}/queue?priority=${priority}&limit=${limit}`, {
       cache: "no-store",
     }).then((res) => res.json())
 

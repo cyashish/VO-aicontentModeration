@@ -2,8 +2,9 @@ import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
+    const baseUrl = process.env.DATABASE_API_URL ?? "http://localhost:8000"
     // Query PostgreSQL for hourly metrics
-    const metrics = await fetch(`${process.env.DATABASE_API_URL}/metrics/hourly`, {
+    const metrics = await fetch(`${baseUrl}/metrics/hourly`, {
       cache: "no-store",
     }).then((res) => res.json())
 

@@ -3,38 +3,74 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { generateRealtimeChatMetrics } from "@/lib/mock-data"
+import { fetchRealtimeData } from "@/lib/api-client"
 import { Activity, Zap, Shield, AlertTriangle } from "lucide-react"
 
+type RealtimeDecisionRow = {
+  message_id: string
+  decision: string
+  processing_time_ms: number
+  is_burst_detected: boolean
+  created_at: string
+}
+
+type RealtimeSummary = {
+  messagesPerSecond: number
+  avgLatencyMs: number
+  blockedMessages: number
+  burstDetections: number
+}
+
 export function RealtimePanel() {
-  const [metrics, setMetrics] = useState(generateRealtimeChatMetrics())
+  const [metrics, setMetrics] = useState<RealtimeSummary>({
+    messagesPerSecond: 0,
+    avgLatencyMs: 0,
+    blockedMessages: 0,
+    burstDetections: 0,
+  })
   const [messages, setMessages] = useState<
     { id: number; text: string; status: "allowed" | "blocked"; timestamp: Date }[]
   >([])
 
   useEffect(() => {
-    const metricsInterval = setInterval(() => {
-      setMetrics(generateRealtimeChatMetrics())
-    }, 2000)
+    let cancelled = false
 
-    const messageInterval = setInterval(() => {
-      const mockMessages = [
-        { text: "GG everyone!", status: "allowed" as const },
-        { text: "Nice play!", status: "allowed" as const },
-        { text: "Check out my profile for...", status: "blocked" as const },
-        { text: "Anyone want to team up?", status: "allowed" as const },
-        { text: "!@#$ you noob", status: "blocked" as const },
-        { text: "Great game!", status: "allowed" as const },
-        { text: "Buy cheap coins at...", status: "blocked" as const },
-      ]
+    const load = async () => {
+      try {
+        const rows = (await fetchRealtimeData()) as RealtimeDecisionRow[]
+        const now = Date.now()
+        const last10s = rows.filter((r) => now - new Date(r.created_at).getTime() <= 10_000)
+        const avgLatency =
+          rows.reduce((acc, r) => acc + (Number(r.processing_time_ms) || 0), 0) / Math.max(1, rows.length)
+        const blocked = rows.filter((r) => r.decision === "rejected").length
+        const bursts = rows.filter((r) => Boolean(r.is_burst_detected)).length
 
-      const newMsg = mockMessages[Math.floor(Math.random() * mockMessages.length)]
-      setMessages((prev) => [{ id: Date.now(), ...newMsg, timestamp: new Date() }, ...prev.slice(0, 9)])
-    }, 500)
+        const stream = rows.slice(0, 10).map((r) => ({
+          id: new Date(r.created_at).getTime(),
+          text: `msg ${r.message_id.slice(0, 8)}...`,
+          status: r.decision === "rejected" ? "blocked" : "allowed",
+          timestamp: new Date(r.created_at),
+        }))
+
+        if (cancelled) return
+        setMetrics({
+          messagesPerSecond: Number((last10s.length / 10).toFixed(1)),
+          avgLatencyMs: Number(avgLatency.toFixed(1)),
+          blockedMessages: blocked,
+          burstDetections: bursts,
+        })
+        setMessages(stream)
+      } catch (e) {
+        console.error("Failed to load realtime decisions", e)
+      }
+    }
+
+    load()
+    const interval = setInterval(load, 2000)
 
     return () => {
-      clearInterval(metricsInterval)
-      clearInterval(messageInterval)
+      cancelled = true
+      clearInterval(interval)
     }
   }, [])
 

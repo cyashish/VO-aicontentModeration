@@ -123,7 +123,6 @@ services:
     depends_on:
       - flink-jobmanager
     command: taskmanager
-    scale: 2
     environment:
       - |
         FLINK_PROPERTIES=
@@ -147,6 +146,8 @@ services:
     # Submit job and exit
     command: >
       flink run -d -m flink-jobmanager:8081 /opt/flink/job.jar
+    profiles:
+      - flinkjob
     networks:
       - moderation-network
 
@@ -214,17 +215,41 @@ services:
     networks:
       - moderation-network
 
-  simulation-runner:
+  # Kafka consumers + DB writer + Prometheus exporter
+  pipeline-worker:
     build:
       context: .
-      dockerfile: Dockerfile.simulation
-    container_name: moderation-simulation
+      dockerfile: Dockerfile.api
+    container_name: pipeline-worker
+    command: ["python", "run_pipeline.py"]
+    ports:
+      - "8001:8001"
     environment:
       - DATABASE_URL=postgresql://moderation:moderation_secret@postgres:5432/content_moderation
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - SIMULATION_DURATION=300
+      - METRICS_PORT=8001
     depends_on:
-      - moderation-api
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - moderation-network
+
+  # Produces Kafka events for Flow A/Flow B so the pipeline has data to process
+  simulation-producer:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: moderation-simulation
+    command: ["python", "-m", "simulation.kafka_event_producer"]
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SIMULATION_DURATION=300
+      - CONTENT_RATE_PER_SEC=5
+      - CHAT_RATE_PER_SEC=20
+    depends_on:
+      - pipeline-worker
       - kafka
     profiles:
       - simulation

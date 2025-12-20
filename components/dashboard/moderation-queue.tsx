@@ -5,9 +5,36 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { generateMockQueue, type QueueItem } from "@/lib/mock-data"
+import { fetchQueue } from "@/lib/api-client"
 import { CheckCircle, XCircle, Clock, AlertTriangle, MessageSquare, ImageIcon, User, Gamepad2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+
+type QueueRow = {
+  id: string
+  content_type: string
+  text_preview: string | null
+  image_urls: string[] | null
+  user_id: string
+  username: string | null
+  priority: number
+  sla_deadline: string
+  escalation_reason: string | null
+  detected_violations: string[] | null
+  ml_confidence: number | null
+}
+
+type QueueItem = {
+  id: string
+  contentType: "forum_post" | "image" | "profile" | "chat"
+  severity: "critical" | "high" | "medium" | "low"
+  preview: string
+  username: string
+  userId: string
+  violationTypes: string[]
+  mlScore: number
+  userReputation: number
+  slaDeadline: Date
+}
 
 const severityColors = {
   critical: "bg-[#ef4444] text-white",
@@ -28,7 +55,53 @@ export function ModerationQueue() {
   const [selectedItem, setSelectedItem] = useState<QueueItem | null>(null)
 
   useEffect(() => {
-    setQueue(generateMockQueue(15))
+    let cancelled = false
+
+    const severityFromPriority = (priority: number): QueueItem["severity"] => {
+      if (priority >= 5) return "critical"
+      if (priority === 4) return "high"
+      if (priority === 3) return "medium"
+      return "low"
+    }
+
+    const contentTypeFromDb = (ct: string): QueueItem["contentType"] => {
+      if (ct === "forum_post") return "forum_post"
+      if (ct === "image") return "image"
+      if (ct === "profile") return "profile"
+      return "chat"
+    }
+
+    const load = async () => {
+      try {
+        const rows = (await fetchQueue()) as QueueRow[]
+        const items: QueueItem[] = rows.map((r) => {
+          const mlConfidence = r.ml_confidence ?? 0.5
+          return {
+            id: r.id,
+            contentType: contentTypeFromDb(r.content_type),
+            severity: severityFromPriority(r.priority),
+            preview: r.text_preview ?? (r.escalation_reason ?? "(no preview)"),
+            username: r.username ?? "unknown",
+            userId: r.user_id,
+            violationTypes: r.detected_violations ?? [],
+            // show "risk" style bar: high risk when confidence is low
+            mlScore: Math.max(0, Math.min(1, 1 - mlConfidence)),
+            userReputation: 50,
+            slaDeadline: new Date(r.sla_deadline),
+          }
+        })
+        if (!cancelled) setQueue(items)
+      } catch (e) {
+        console.error("Failed to load review queue", e)
+      }
+    }
+
+    load()
+    const interval = setInterval(load, 5000)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
   }, [])
 
   const handleAction = (id: string, action: "approve" | "reject") => {
