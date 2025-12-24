@@ -17,7 +17,7 @@ from realtime_chat_simulator import RealtimeChatSimulator, SimulationConfig
 from models.content import Content, ModerationResult
 from models.realtime import ChatMessage, FlinkDecision
 from services.moderation_service import ModerationService
-from services.realtime_service import RealtimeService
+from services.realtime_service import RealTimeService
 
 
 @dataclass
@@ -191,7 +191,7 @@ class PipelineRunner:
         self.chat_simulator = RealtimeChatSimulator(config=chat_config)
         
         self.moderation_service = ModerationService()
-        self.realtime_service = RealtimeService()
+        self.realtime_service = RealTimeService()
         
         self.metrics = MetricsCollector()
         self.running = False

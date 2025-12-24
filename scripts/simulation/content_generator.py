@@ -112,7 +112,7 @@ SCENARIOS = [
         name="inappropriate_profile",
         content_type=ContentType.PROFILE,
         violation_probability=0.85,
-        violation_types=[ViolationType.ADULT_CONTENT, ViolationType.OFFENSIVE_USERNAME],
+        violation_types=[ViolationType.ADULT_CONTENT, ViolationType.PROFANITY],
         severity_distribution={SeverityLevel.MEDIUM: 0.5, SeverityLevel.HIGH: 0.4, SeverityLevel.CRITICAL: 0.1},
         text_templates=[
             "Add me on {platform} for {inappropriate_content}",
@@ -134,7 +134,7 @@ SCENARIOS = [
         name="inappropriate_image",
         content_type=ContentType.IMAGE,
         violation_probability=0.90,
-        violation_types=[ViolationType.ADULT_CONTENT, ViolationType.VIOLENCE, ViolationType.GORE],
+        violation_types=[ViolationType.ADULT_CONTENT, ViolationType.VIOLENCE],
         severity_distribution={SeverityLevel.HIGH: 0.5, SeverityLevel.CRITICAL: 0.5},
         text_templates=["[Flagged image content]"],
         image_categories=["nsfw", "violence", "gore", "hate_symbol"]
