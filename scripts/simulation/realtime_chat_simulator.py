@@ -14,8 +14,8 @@ from enum import Enum
 import json
 import sys
 sys.path.append('..')
-from models.enums import ViolationType, SeverityLevel
-from models.realtime import ChatMessage, MessageType, FlinkDecision, DecisionType
+from models.enums import ViolationType, SeverityLevel, MessageType, DecisionType
+from models.realtime import ChatMessage, FlinkDecision
 
 
 class ChatPattern(Enum):
@@ -382,8 +382,9 @@ class RealtimeChatSimulator:
         start_time = time.perf_counter()
         
         # Simulate processing
-        violations = message.metadata.get("expected_violations", [])
-        severity = message.metadata.get("expected_severity", "none")
+        metadata = message.metadata or {}
+        violations = metadata.get("expected_violations", [])
+        severity = metadata.get("expected_severity", "none")
         
         if violations:
             if severity in ["high", "critical"]:
@@ -408,7 +409,7 @@ class RealtimeChatSimulator:
         )
         
         decision = FlinkDecision(
-            message_id=message.message_id,
+            message_id=message.message_id or message.get_id(),
             decision_type=decision_type,
             confidence_score=random.uniform(0.7, 0.99) if violations else random.uniform(0.85, 0.99),
             processing_time_ms=simulated_latency,
@@ -474,12 +475,16 @@ def main():
         message = simulator.generate_message()
         decision = simulator.simulate_moderation_decision(message)
         
-        status = "BLOCKED" if decision.decision_type == DecisionType.BLOCK else (
-            "FLAGGED" if decision.decision_type == DecisionType.FLAG else "ALLOWED"
+        decision_type = decision.decision_type or DecisionType.ALLOW
+        status = "BLOCKED" if decision_type == DecisionType.BLOCK else (
+            "FLAGGED" if decision_type == DecisionType.FLAG else "ALLOWED"
         )
         
-        print(f"[{message.channel_id[:12]}] {message.user_id[:12]}: {message.content[:40]}")
-        print(f"  -> {status} ({decision.processing_time_ms:.2f}ms) | Type: {message.message_type.value}")
+        user_id_str = str(message.user_id)[:12]
+        content_str = message.get_text()[:40]
+        msg_type_str = message.message_type.value if message.message_type else "unknown"
+        print(f"[{message.channel_id[:12]}] {user_id_str}: {content_str}")
+        print(f"  -> {status} ({decision.processing_time_ms:.2f}ms) | Type: {msg_type_str}")
         print()
     
     # Trigger an attack
@@ -493,11 +498,12 @@ def main():
         message = simulator.generate_message(channel)
         decision = simulator.simulate_moderation_decision(message)
         
-        status = "BLOCKED" if decision.decision_type == DecisionType.BLOCK else (
-            "FLAGGED" if decision.decision_type == DecisionType.FLAG else "ALLOWED"
+        decision_type = decision.decision_type or DecisionType.ALLOW
+        status = "BLOCKED" if decision_type == DecisionType.BLOCK else (
+            "FLAGGED" if decision_type == DecisionType.FLAG else "ALLOWED"
         )
         
-        print(f"[ATTACK] {message.content[:50]} -> {status}")
+        print(f"[ATTACK] {message.get_text()[:50]} -> {status}")
     
     # Print metrics
     print("\n--- Simulation Metrics ---")

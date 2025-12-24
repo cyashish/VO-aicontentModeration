@@ -101,3 +101,17 @@ class FlinkWindowType(str, Enum):
     TUMBLING = "tumbling"     # Fixed, non-overlapping windows
     SLIDING = "sliding"       # Overlapping windows
     SESSION = "session"       # Activity-based windows
+
+
+class MessageType(str, Enum):
+    """Type of chat message for real-time moderation."""
+    NORMAL = "normal"         # Regular chat message
+    SPAM = "spam"             # Spam message
+    TOXIC = "toxic"           # Toxic/harmful message
+
+
+class DecisionType(str, Enum):
+    """Real-time moderation decision type."""
+    ALLOW = "allow"           # Message allowed through
+    FLAG = "flag"             # Message flagged for review
+    BLOCK = "block"           # Message blocked
