@@ -10,10 +10,16 @@ from datetime import datetime, timedelta
 from typing import List, Optional, Generator
 from dataclasses import dataclass, field
 import json
+import os
 import sys
-sys.path.append('..')
+
+# Ensure scripts directory is in path for imports
+_scripts_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _scripts_dir not in sys.path:
+    sys.path.insert(0, _scripts_dir)
+
 from models.enums import ContentType, SeverityLevel, ViolationType
-from models.content import Content
+from models.content import Content, ContentMetadata
 
 
 @dataclass
@@ -297,31 +303,40 @@ class ContentGenerator:
         severity = self._select_severity(scenario.severity_distribution) if has_violation else SeverityLevel.NONE
         
         # Generate image URL if applicable
-        image_urls = []
+        image_url = None
+        media_urls = []
         if scenario.content_type == ContentType.IMAGE and scenario.image_categories:
             category = random.choice(scenario.image_categories)
-            image_urls = [f"https://cdn.example.com/images/{uuid.uuid4().hex}.jpg?category={category}"]
+            image_url = f"https://cdn.example.com/images/{uuid.uuid4().hex}.jpg?category={category}"
+            media_urls = [image_url]
         
-        # Create content object
-        content = Content(
-            content_id=f"content_{uuid.uuid4().hex[:12]}",
-            content_type=scenario.content_type,
-            user_id=user["user_id"],
-            text_content=text_content,
-            image_urls=image_urls,
-            metadata={
-                "scenario": scenario.name,
-                "user_risk_type": user["risk_type"],
-                "user_reputation": user["reputation_score"],
-                "expected_violations": [v.value for v in violations],
-                "expected_severity": severity.value,
-                "source_ip": f"{random.randint(1,255)}.{random.randint(0,255)}.{random.randint(0,255)}.{random.randint(0,255)}",
-                "client_version": f"1.{random.randint(0,9)}.{random.randint(0,99)}",
-                "platform": random.choice(["web", "ios", "android", "desktop"]),
-            },
-            created_at=datetime.utcnow(),
-            source_region=random.choice(["us-east-1", "us-west-2", "eu-west-1", "ap-northeast-1"]),
+        # Create metadata object
+        source_ip = f"{random.randint(1,255)}.{random.randint(0,255)}.{random.randint(0,255)}.{random.randint(0,255)}"
+        content_metadata = ContentMetadata(
+            ip_address=source_ip,
+            user_agent=f"GameClient/1.{random.randint(0,9)}.{random.randint(0,99)}",
+            geo_location=random.choice(["us-east-1", "us-west-2", "eu-west-1", "ap-northeast-1"]),
         )
+        
+        # Create content object matching the Pydantic model
+        content = Content(
+            content_type=scenario.content_type,
+            user_id=uuid.UUID(user["user_id"].replace("user_", "").ljust(32, '0')[:32]) if user["user_id"].startswith("user_") else uuid.uuid4(),
+            text_content=text_content,
+            image_url=image_url,
+            media_urls=media_urls,
+            metadata=content_metadata,
+            created_at=datetime.utcnow(),
+        )
+        
+        # Store simulation metadata as an attribute for testing (won't serialize)
+        content._sim_metadata = {
+            "scenario": scenario.name,
+            "user_risk_type": user["risk_type"],
+            "user_reputation": user["reputation_score"],
+            "expected_violations": [v.value for v in violations],
+            "expected_severity": severity.value,
+        }
         
         return content
     
@@ -360,20 +375,27 @@ class ContentGenerator:
             template = random.choice(scenario.text_templates)
             text_content = self._fill_template(template)
             
-            content = Content(
-                content_id=f"content_{uuid.uuid4().hex[:12]}",
-                content_type=scenario.content_type,
-                user_id=attacker["user_id"],
-                text_content=text_content,
-                image_urls=[],
-                metadata={
-                    "scenario": f"burst_{burst_type}",
-                    "user_risk_type": "attacker",
-                    "burst_attack": True,
-                },
-                created_at=datetime.utcnow(),
-                source_region="us-east-1",
+            # Create metadata for burst attack
+            burst_metadata = ContentMetadata(
+                ip_address=f"{random.randint(1,255)}.{random.randint(0,255)}.{random.randint(0,255)}.{random.randint(0,255)}",
+                geo_location="us-east-1",
             )
+            
+            content = Content(
+                content_type=scenario.content_type,
+                user_id=uuid.uuid4(),  # Generate proper UUID for attacker
+                text_content=text_content,
+                media_urls=[],
+                metadata=burst_metadata,
+                created_at=datetime.utcnow(),
+            )
+            
+            # Store simulation metadata
+            content._sim_metadata = {
+                "scenario": f"burst_{burst_type}",
+                "user_risk_type": "attacker",
+                "burst_attack": True,
+            }
             contents.append(content)
         
         return contents
@@ -390,9 +412,11 @@ def main():
     # Generate sample content
     print("\n--- Sample Content (10 items) ---\n")
     for i, content in enumerate(generator.generate_batch(10), 1):
-        print(f"{i}. [{content.content_type.value}] {content.text_content[:80]}...")
-        print(f"   User: {content.user_id} | Scenario: {content.metadata.get('scenario')}")
-        print(f"   Expected: {content.metadata.get('expected_violations')} | Severity: {content.metadata.get('expected_severity')}")
+        text_preview = (content.text_content or "")[:80]
+        sim_meta = getattr(content, '_sim_metadata', {})
+        print(f"{i}. [{content.content_type.value}] {text_preview}...")
+        print(f"   User: {content.user_id} | Scenario: {sim_meta.get('scenario')}")
+        print(f"   Expected: {sim_meta.get('expected_violations')} | Severity: {sim_meta.get('expected_severity')}")
         print()
     
     # Generate burst
@@ -413,10 +437,11 @@ def main():
         ct = content.content_type.value
         type_counts[ct] = type_counts.get(ct, 0) + 1
         
-        for v in content.metadata.get("expected_violations", []):
+        sim_meta = getattr(content, '_sim_metadata', {})
+        for v in sim_meta.get("expected_violations", []):
             violation_counts[v] = violation_counts.get(v, 0) + 1
         
-        sev = content.metadata.get("expected_severity", "none")
+        sev = sim_meta.get("expected_severity", "none")
         severity_counts[sev] = severity_counts.get(sev, 0) + 1
     
     print(f"\nContent Types: {json.dumps(type_counts, indent=2)}")

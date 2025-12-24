@@ -12,8 +12,14 @@ from typing import List, Optional, Generator, Callable, Dict, Any
 from dataclasses import dataclass, field
 from enum import Enum
 import json
+import os
 import sys
-sys.path.append('..')
+
+# Ensure scripts directory is in path for imports
+_scripts_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _scripts_dir not in sys.path:
+    sys.path.insert(0, _scripts_dir)
+
 from models.enums import ViolationType, SeverityLevel, MessageType, DecisionType
 from models.realtime import ChatMessage, FlinkDecision
 
@@ -412,7 +418,7 @@ class RealtimeChatSimulator:
             message_id=message.message_id or message.get_id(),
             decision_type=decision_type,
             confidence_score=random.uniform(0.7, 0.99) if violations else random.uniform(0.85, 0.99),
-            processing_time_ms=simulated_latency,
+            processing_time_ms=int(simulated_latency),  # Must be int
             violations_detected=[ViolationType(v) for v in violations],
             risk_score=random.uniform(0.6, 0.95) if violations else random.uniform(0.05, 0.3),
             metadata={

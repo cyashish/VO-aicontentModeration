@@ -15,8 +15,38 @@ import random
 import time
 from datetime import datetime
 from uuid import uuid4
+import sys
 
-from lib.kafka_client import broker
+# Ensure scripts directory is in path for imports
+_scripts_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _scripts_dir not in sys.path:
+    sys.path.insert(0, _scripts_dir)
+
+
+# Lazy import broker to handle Kafka unavailability gracefully
+_broker = None
+_broker_error = None
+
+
+def _get_broker():
+    """Lazily initialize the Kafka broker, handling errors gracefully."""
+    global _broker, _broker_error
+    
+    if _broker_error:
+        raise _broker_error
+    
+    if _broker is None:
+        try:
+            from lib.kafka_client import broker
+            _broker = broker
+        except Exception as e:
+            _broker_error = RuntimeError(
+                f"Failed to initialize Kafka broker. Ensure Kafka is running at "
+                f"{os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092')}. Error: {e}"
+            )
+            raise _broker_error
+    
+    return _broker
 
 
 def _random_text() -> str:
@@ -34,6 +64,14 @@ def run():
     duration = int(os.getenv("SIMULATION_DURATION", "300"))
     content_rate = float(os.getenv("CONTENT_RATE_PER_SEC", "5"))
     chat_rate = float(os.getenv("CHAT_RATE_PER_SEC", "20"))
+
+    # Initialize broker - will fail early with clear message if Kafka unavailable
+    try:
+        broker = _get_broker()
+    except RuntimeError as e:
+        print(f"[producer] ERROR: {e}")
+        print("[producer] Please start Kafka before running the producer.")
+        return
 
     start = time.time()
     next_content = start
@@ -79,4 +117,3 @@ def run():
 
 if __name__ == "__main__":
     run()
-

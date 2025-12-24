@@ -4,16 +4,22 @@ Combines content generation, stream processing, and metrics collection
 """
 
 import asyncio
+import random
 import time
 import json
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 from dataclasses import dataclass
+import os
 import sys
-sys.path.append('..')
 
-from content_generator import ContentGenerator
-from realtime_chat_simulator import RealtimeChatSimulator, SimulationConfig
+# Ensure scripts directory is in path for imports
+_scripts_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _scripts_dir not in sys.path:
+    sys.path.insert(0, _scripts_dir)
+
+from simulation.content_generator import ContentGenerator
+from simulation.realtime_chat_simulator import RealtimeChatSimulator, SimulationConfig
 from models.content import Content, ModerationResult
 from models.realtime import ChatMessage, FlinkDecision
 from services.moderation_service import ModerationService
@@ -76,18 +82,20 @@ class MetricsCollector:
         """Record Flow A (async content) metrics"""
         self.flow_a_metrics["total_content"] += 1
         
-        if result.final_decision.value == "approved":
+        # Use correct field names from ModerationResult model
+        decision_value = result.decision.value if result.decision else "unknown"
+        if decision_value == "approved":
             self.flow_a_metrics["approved"] += 1
-        elif result.final_decision.value == "rejected":
+        elif decision_value == "rejected":
             self.flow_a_metrics["rejected"] += 1
         else:
             self.flow_a_metrics["escalated"] += 1
         
-        # Track tier decisions
-        tier = result.decision_tier
-        if tier == 1:
+        # Track tier decisions using tier_processed field
+        tier_value = result.tier_processed.value if result.tier_processed else "tier1_fast"
+        if "tier1" in tier_value:
             self.flow_a_metrics["tier1_decisions"] += 1
-        elif tier == 2:
+        elif "tier2" in tier_value:
             self.flow_a_metrics["tier2_decisions"] += 1
         else:
             self.flow_a_metrics["tier3_decisions"] += 1
@@ -95,8 +103,8 @@ class MetricsCollector:
         # Track latency
         self.flow_a_metrics["total_latency_ms"] += result.processing_time_ms
         
-        # Track violations
-        for v in result.violations_detected:
+        # Track violations using 'violations' field (not violations_detected)
+        for v in result.violations:
             vtype = v.value
             self.flow_a_metrics["violations_by_type"][vtype] = (
                 self.flow_a_metrics["violations_by_type"].get(vtype, 0) + 1
@@ -347,8 +355,6 @@ class PipelineRunner:
         return results
 
 
-# Need random for attack simulator
-import random
 
 
 async def main():
