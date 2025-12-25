@@ -21,7 +21,12 @@
   "panels": [
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
       "id": 1,
       "panels": [],
       "title": "Service Health",
@@ -31,23 +36,58 @@
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
             {
-              "options": { "0": { "color": "red", "text": "DOWN" }, "1": { "color": "green", "text": "UP" } },
+              "options": {
+                "0": {
+                  "color": "red",
+                  "text": "DOWN"
+                },
+                "1": {
+                  "color": "green",
+                  "text": "UP"
+                }
+              },
               "type": "value"
             }
           ],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }]
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
           }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 1 },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
       "id": 2,
-      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto" },
-      "targets": [{ "expr": "up{job=\"moderation-api\"}", "refId": "A" }],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto"
+      },
+      "targets": [
+        {
+          "expr": "up{job=\"moderation-api\"}",
+          "refId": "A"
+        }
+      ],
       "title": "Moderation API",
       "type": "stat"
     },
@@ -55,23 +95,57 @@
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
             {
-              "options": { "0": { "color": "red", "text": "DOWN" }, "1": { "color": "green", "text": "UP" } },
+              "options": {
+                "0": {
+                  "color": "red",
+                  "text": "DOWN"
+                },
+                "1": {
+                  "color": "green",
+                  "text": "UP"
+                }
+              },
               "type": "value"
             }
           ],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }]
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
           }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 1 },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 1
+      },
       "id": 3,
-      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center" },
-      "targets": [{ "expr": "up{job=\"triage-service\"}", "refId": "A" }],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center"
+      },
+      "targets": [
+        {
+          "expr": "up{job=\"triage-service\"}",
+          "refId": "A"
+        }
+      ],
       "title": "Triage Service",
       "type": "stat"
     },
@@ -79,23 +153,57 @@
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
             {
-              "options": { "0": { "color": "red", "text": "DOWN" }, "1": { "color": "green", "text": "UP" } },
+              "options": {
+                "0": {
+                  "color": "red",
+                  "text": "DOWN"
+                },
+                "1": {
+                  "color": "green",
+                  "text": "UP"
+                }
+              },
               "type": "value"
             }
           ],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }]
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
           }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 1 },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
       "id": 4,
-      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center" },
-      "targets": [{ "expr": "up{job=\"ml-scoring\"}", "refId": "A" }],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center"
+      },
+      "targets": [
+        {
+          "expr": "up{job=\"ml-scoring\"}",
+          "refId": "A"
+        }
+      ],
       "title": "ML Scoring",
       "type": "stat"
     },
@@ -103,23 +211,57 @@
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
             {
-              "options": { "0": { "color": "red", "text": "DOWN" }, "1": { "color": "green", "text": "UP" } },
+              "options": {
+                "0": {
+                  "color": "red",
+                  "text": "DOWN"
+                },
+                "1": {
+                  "color": "green",
+                  "text": "UP"
+                }
+              },
               "type": "value"
             }
           ],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }]
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
           }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 1 },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
       "id": 5,
-      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center" },
-      "targets": [{ "expr": "up{job=\"flink-processor\"}", "refId": "A" }],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center"
+      },
+      "targets": [
+        {
+          "expr": "up{job=\"flink-processor\"}",
+          "refId": "A"
+        }
+      ],
       "title": "Flink Processor",
       "type": "stat"
     },
@@ -127,23 +269,57 @@
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
             {
-              "options": { "0": { "color": "red", "text": "DOWN" }, "1": { "color": "green", "text": "UP" } },
+              "options": {
+                "0": {
+                  "color": "red",
+                  "text": "DOWN"
+                },
+                "1": {
+                  "color": "green",
+                  "text": "UP"
+                }
+              },
               "type": "value"
             }
           ],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }]
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
           }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 1 },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
       "id": 6,
-      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center" },
-      "targets": [{ "expr": "up{job=\"kinesis-consumer\"}", "refId": "A" }],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center"
+      },
+      "targets": [
+        {
+          "expr": "up{job=\"kinesis-consumer\"}",
+          "refId": "A"
+        }
+      ],
       "title": "Kinesis Consumer",
       "type": "stat"
     },
@@ -151,29 +327,68 @@
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [
             {
-              "options": { "0": { "color": "red", "text": "DOWN" }, "1": { "color": "green", "text": "UP" } },
+              "options": {
+                "0": {
+                  "color": "red",
+                  "text": "DOWN"
+                },
+                "1": {
+                  "color": "green",
+                  "text": "UP"
+                }
+              },
               "type": "value"
             }
           ],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }]
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
           }
         }
       },
-      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 1 },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
       "id": 7,
-      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center" },
-      "targets": [{ "expr": "up{job=\"sqs-handler\"}", "refId": "A" }],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center"
+      },
+      "targets": [
+        {
+          "expr": "up{job=\"sqs-handler\"}",
+          "refId": "A"
+        }
+      ],
       "title": "SQS Handler",
       "type": "stat"
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
       "id": 8,
       "panels": [],
       "title": "Queue Metrics",
@@ -183,7 +398,9 @@
       "datasource": "CloudWatch",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
@@ -194,15 +411,31 @@
           "unit": "short"
         }
       },
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 6 },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 6
+      },
       "id": 9,
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
       },
       "targets": [
         {
-          "dimensions": { "QueueName": "moderation-tier1-queue" },
+          "dimensions": {
+            "QueueName": "moderation-tier1-queue"
+          },
           "expression": "",
           "id": "",
           "matchExact": true,
@@ -211,21 +444,31 @@
           "period": "",
           "refId": "A",
           "region": "default",
-          "statistics": ["Average"]
+          "statistics": [
+            "Average"
+          ]
         },
         {
-          "dimensions": { "QueueName": "moderation-tier2-queue" },
+          "dimensions": {
+            "QueueName": "moderation-tier2-queue"
+          },
           "metricName": "ApproximateNumberOfMessagesVisible",
           "namespace": "AWS/SQS",
           "refId": "B",
-          "statistics": ["Average"]
+          "statistics": [
+            "Average"
+          ]
         },
         {
-          "dimensions": { "QueueName": "moderation-tier3-queue" },
+          "dimensions": {
+            "QueueName": "moderation-tier3-queue"
+          },
           "metricName": "ApproximateNumberOfMessagesVisible",
           "namespace": "AWS/SQS",
           "refId": "C",
-          "statistics": ["Average"]
+          "statistics": [
+            "Average"
+          ]
         }
       ],
       "title": "SQS Queue Depth",
@@ -235,7 +478,9 @@
       "datasource": "CloudWatch",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
@@ -246,26 +491,48 @@
           "unit": "short"
         }
       },
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 6 },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 6
+      },
       "id": 10,
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
       },
       "targets": [
         {
-          "dimensions": { "StreamName": "content-moderation-stream" },
+          "dimensions": {
+            "StreamName": "content-moderation-stream"
+          },
           "metricName": "GetRecords.IteratorAgeMilliseconds",
           "namespace": "AWS/Kinesis",
           "refId": "A",
-          "statistics": ["Average"]
+          "statistics": [
+            "Average"
+          ]
         },
         {
-          "dimensions": { "StreamName": "chat-moderation-stream" },
+          "dimensions": {
+            "StreamName": "chat-moderation-stream"
+          },
           "metricName": "GetRecords.IteratorAgeMilliseconds",
           "namespace": "AWS/Kinesis",
           "refId": "B",
-          "statistics": ["Average"]
+          "statistics": [
+            "Average"
+          ]
         }
       ],
       "title": "Kinesis Iterator Age",
@@ -275,7 +542,9 @@
       "datasource": "CloudWatch",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
@@ -285,34 +554,191 @@
           "unit": "short"
         }
       },
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 6 },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 6
+      },
       "id": 11,
       "options": {
-        "legend": { "calcs": ["sum"], "displayMode": "table", "placement": "bottom" },
-        "tooltip": { "mode": "multi" }
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
       },
       "targets": [
         {
-          "dimensions": { "StreamName": "content-moderation-stream" },
+          "dimensions": {
+            "StreamName": "content-moderation-stream"
+          },
           "metricName": "IncomingRecords",
           "namespace": "AWS/Kinesis",
           "refId": "A",
-          "statistics": ["Sum"]
+          "statistics": [
+            "Sum"
+          ]
         },
         {
-          "dimensions": { "StreamName": "chat-moderation-stream" },
+          "dimensions": {
+            "StreamName": "chat-moderation-stream"
+          },
           "metricName": "IncomingRecords",
           "namespace": "AWS/Kinesis",
           "refId": "B",
-          "statistics": ["Sum"]
+          "statistics": [
+            "Sum"
+          ]
         }
       ],
       "title": "Kinesis Incoming Records",
       "type": "timeseries"
     },
     {
+      "datasource": "CloudWatch",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 10
+              },
+              {
+                "color": "orange",
+                "value": 50
+              },
+              {
+                "color": "red",
+                "value": 100
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 14
+      },
+      "id": 19,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "dimensions": {
+            "QueueName": "moderation-dlq"
+          },
+          "metricName": "ApproximateNumberOfMessagesVisible",
+          "namespace": "AWS/SQS",
+          "refId": "A",
+          "region": "default",
+          "statistics": [
+            "Average"
+          ]
+        }
+      ],
+      "title": "SQS Dead Letter Queue",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "orange",
+                "value": 20
+              },
+              {
+                "color": "red",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 14
+      },
+      "id": 20,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "expr": "kafka_log_log_size{topic=\"dlq-stream\"}",
+          "legendFormat": "DLQ Messages",
+          "refId": "A"
+        }
+      ],
+      "title": "Kafka DLQ Stream",
+      "type": "stat"
+    },
+    {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
       "id": 12,
       "panels": [],
       "title": "Database & Storage",
@@ -322,7 +748,9 @@
       "datasource": "CloudWatch",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
@@ -332,25 +760,45 @@
           "unit": "percent"
         }
       },
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 15 },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 15
+      },
       "id": 13,
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        }
       },
       "targets": [
         {
-          "dimensions": { "TableName": "content_moderation" },
+          "dimensions": {
+            "TableName": "content_moderation"
+          },
           "metricName": "ConsumedReadCapacityUnits",
           "namespace": "AWS/DynamoDB",
           "refId": "A",
-          "statistics": ["Average"]
+          "statistics": [
+            "Average"
+          ]
         },
         {
-          "dimensions": { "TableName": "content_moderation" },
+          "dimensions": {
+            "TableName": "content_moderation"
+          },
           "metricName": "ConsumedWriteCapacityUnits",
           "namespace": "AWS/DynamoDB",
           "refId": "B",
-          "statistics": ["Average"]
+          "statistics": [
+            "Average"
+          ]
         }
       ],
       "title": "DynamoDB Capacity Usage",
@@ -360,7 +808,9 @@
       "datasource": "PostgreSQL",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
@@ -370,10 +820,22 @@
           "unit": "short"
         }
       },
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 15 },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 15
+      },
       "id": 14,
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        }
       },
       "targets": [
         {
@@ -390,7 +852,9 @@
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
@@ -400,10 +864,22 @@
           "unit": "bytes"
         }
       },
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 15 },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 15
+      },
       "id": 15,
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        }
       },
       "targets": [
         {
@@ -417,7 +893,12 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
       "id": 16,
       "panels": [],
       "title": "Lambda & Compute",
@@ -427,7 +908,9 @@
       "datasource": "CloudWatch",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
@@ -437,32 +920,55 @@
           "unit": "short"
         }
       },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
       "id": 17,
       "options": {
-        "legend": { "calcs": ["sum"], "displayMode": "table", "placement": "bottom" }
+        "legend": {
+          "calcs": [
+            "sum"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        }
       },
       "targets": [
         {
-          "dimensions": { "FunctionName": "moderation-tier1" },
+          "dimensions": {
+            "FunctionName": "moderation-tier1"
+          },
           "metricName": "Invocations",
           "namespace": "AWS/Lambda",
           "refId": "A",
-          "statistics": ["Sum"]
+          "statistics": [
+            "Sum"
+          ]
         },
         {
-          "dimensions": { "FunctionName": "moderation-tier2" },
+          "dimensions": {
+            "FunctionName": "moderation-tier2"
+          },
           "metricName": "Invocations",
           "namespace": "AWS/Lambda",
           "refId": "B",
-          "statistics": ["Sum"]
+          "statistics": [
+            "Sum"
+          ]
         },
         {
-          "dimensions": { "FunctionName": "moderation-tier3" },
+          "dimensions": {
+            "FunctionName": "moderation-tier3"
+          },
           "metricName": "Invocations",
           "namespace": "AWS/Lambda",
           "refId": "C",
-          "statistics": ["Sum"]
+          "statistics": [
+            "Sum"
+          ]
         }
       ],
       "title": "Lambda Invocations",
@@ -472,7 +978,9 @@
       "datasource": "CloudWatch",
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
+          "color": {
+            "mode": "palette-classic"
+          },
           "custom": {
             "drawStyle": "line",
             "fillOpacity": 10,
@@ -482,32 +990,56 @@
           "unit": "ms"
         }
       },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
       "id": 18,
       "options": {
-        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        }
       },
       "targets": [
         {
-          "dimensions": { "FunctionName": "moderation-tier1" },
+          "dimensions": {
+            "FunctionName": "moderation-tier1"
+          },
           "metricName": "Duration",
           "namespace": "AWS/Lambda",
           "refId": "A",
-          "statistics": ["Average"]
+          "statistics": [
+            "Average"
+          ]
         },
         {
-          "dimensions": { "FunctionName": "moderation-tier2" },
+          "dimensions": {
+            "FunctionName": "moderation-tier2"
+          },
           "metricName": "Duration",
           "namespace": "AWS/Lambda",
           "refId": "B",
-          "statistics": ["Average"]
+          "statistics": [
+            "Average"
+          ]
         },
         {
-          "dimensions": { "FunctionName": "moderation-tier3" },
+          "dimensions": {
+            "FunctionName": "moderation-tier3"
+          },
           "metricName": "Duration",
           "namespace": "AWS/Lambda",
           "refId": "C",
-          "statistics": ["Average"]
+          "statistics": [
+            "Average"
+          ]
         }
       ],
       "title": "Lambda Duration",
@@ -517,9 +1049,18 @@
   "refresh": "30s",
   "schemaVersion": 30,
   "style": "dark",
-  "tags": ["moderation", "infrastructure", "health"],
-  "templating": { "list": [] },
-  "time": { "from": "now-6h", "to": "now" },
+  "tags": [
+    "moderation",
+    "infrastructure",
+    "health"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
   "timepicker": {},
   "timezone": "browser",
   "title": "Content Moderation - System Health",

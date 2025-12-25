@@ -9,7 +9,7 @@ import { ModerationQueue } from "@/components/dashboard/moderation-queue"
 import { RealtimePanel } from "@/components/dashboard/realtime-panel"
 import { SLAGauge } from "@/components/dashboard/sla-gauge"
 import { fetchMetrics } from "@/lib/api-client"
-import { Activity, CheckCircle, XCircle, Clock, Zap, Target } from "lucide-react"
+import { Activity, CheckCircle, XCircle, Clock, Zap, Target, AlertTriangle } from "lucide-react"
 
 type DashboardMetrics = {
   totalProcessed: number
@@ -19,11 +19,13 @@ type DashboardMetrics = {
   avgLatencyMs: number
   throughputPerSec: number
   slaCompliance: number
+  dlqCount?: number
 }
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview")
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null)
+  const [dlqCount, setDlqCount] = useState<number>(0)
 
   useEffect(() => {
     let cancelled = false
@@ -37,9 +39,26 @@ export default function DashboardPage() {
       }
     }
 
+    const loadDlq = async () => {
+      try {
+        const response = await fetch('/api/dlq')
+        const data = await response.json()
+        if (!cancelled) setDlqCount(data.total_dlq_count || 0)
+      } catch (e) {
+        console.error("Failed to load DLQ metrics", e)
+      }
+    }
+
     load()
-    const interval = setInterval(load, 5000)
-    return () => clearInterval(interval)
+    loadDlq()
+    const interval = setInterval(() => {
+      load()
+      loadDlq()
+    }, 5000)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
   }, [])
 
   if (!metrics) return <div className="flex h-screen items-center justify-center bg-background">Loading...</div>
@@ -58,7 +77,7 @@ export default function DashboardPage() {
           {activeTab === "overview" && (
             <div className="space-y-6">
               {/* KPI Cards */}
-              <div className="grid grid-cols-6 gap-4">
+              <div className="grid grid-cols-7 gap-4">
                 <MetricCard
                   title="Total Processed"
                   value={metrics.totalProcessed.toLocaleString()}
@@ -103,6 +122,13 @@ export default function DashboardPage() {
                   trend="up"
                   trendValue="+5%"
                   icon={<Target className="h-4 w-4" />}
+                />
+                <MetricCard
+                  title="Failed Messages"
+                  value={dlqCount}
+                  subtitle="In DLQ"
+                  variant={dlqCount > 0 ? "critical" : "success"}
+                  icon={<AlertTriangle className="h-4 w-4" />}
                 />
               </div>
 
