@@ -299,14 +299,20 @@ class DatabaseConnection:
             )
     
     def get_metrics_hourly(self, hours: int = 24) -> List[Dict]:
-        """Get hourly metrics for dashboard"""
+        """Get hourly metrics from realtime_decisions"""
         with self.get_cursor() as cursor:
             cursor.execute(
                 """
-                SELECT *
-                FROM metrics_hourly
-                WHERE metric_hour >= NOW() - (%s || ' hours')::interval
-                ORDER BY metric_hour DESC
+                SELECT 
+                    date_trunc('hour', created_at) as metric_hour,
+                    count(*) as total_processed,
+                    count(*) filter (where decision = 'approved') as approved_count,
+                    count(*) filter (where decision = 'rejected') as rejected_count,
+                    avg(processing_time_ms) as avg_latency_ms
+                FROM realtime_decisions
+                WHERE created_at >= NOW() - (%s || ' hours')::interval
+                GROUP BY 1
+                ORDER BY 1 DESC
                 """,
                 (hours,),
             )
@@ -336,7 +342,7 @@ class DatabaseConnection:
             }
 
     def get_moderation_hourly_series(self, hours: int = 24) -> List[Dict[str, Any]]:
-        """Compute an hourly series directly from moderation_results."""
+        """Compute hourly series from realtime_decisions."""
         with self.get_cursor() as cursor:
             cursor.execute(
                 """
@@ -346,7 +352,7 @@ class DatabaseConnection:
                     SUM(CASE WHEN decision = 'approved' THEN 1 ELSE 0 END) AS approved,
                     SUM(CASE WHEN decision = 'rejected' THEN 1 ELSE 0 END) AS rejected,
                     AVG(processing_time_ms) AS avg_latency_ms
-                FROM moderation_results
+                FROM realtime_decisions
                 WHERE created_at >= NOW() - (%s || ' hours')::interval
                 GROUP BY 1
                 ORDER BY 1 ASC
