@@ -319,16 +319,16 @@ class DatabaseConnection:
             return cursor.fetchall()
 
     def get_moderation_summary(self, hours: int = 24) -> Dict[str, Any]:
-        """Compute KPI-style summary directly from moderation_results."""
+        """Compute KPI-style summary directly from realtime_decisions."""
         with self.get_cursor() as cursor:
             cursor.execute(
                 """
                 SELECT
                     COUNT(*) AS total_processed,
-                    SUM(CASE WHEN decision = 'approved' THEN 1 ELSE 0 END) AS approved_count,
-                    SUM(CASE WHEN decision = 'rejected' THEN 1 ELSE 0 END) AS rejected_count,
+                    COUNT(*) FILTER (WHERE decision = 'approved') AS approved_count,
+                    COUNT(*) FILTER (WHERE decision = 'rejected') AS rejected_count,
                     AVG(processing_time_ms) AS avg_latency_ms
-                FROM moderation_results
+                FROM realtime_decisions
                 WHERE created_at >= NOW() - (%s || ' hours')::interval
                 """,
                 (hours,),
